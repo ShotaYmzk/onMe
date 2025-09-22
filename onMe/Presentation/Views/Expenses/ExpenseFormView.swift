@@ -36,6 +36,9 @@ struct ExpenseFormView: View {
     @State private var alertMessage = ""
     @State private var isProcessingOCR = false
     @State private var selectedGroupId: UUID?
+    @State private var selectedLocationName: String?
+    @State private var selectedLatitude: Double?
+    @State private var selectedLongitude: Double?
     
     private let ocrService = ReceiptOCRService()
     
@@ -87,6 +90,7 @@ struct ExpenseFormView: View {
                     customSplitSection
                 }
                 receiptSection
+                locationSection
                 additionalInfoSection
             }
             .navigationTitle("支出を登録")
@@ -404,6 +408,16 @@ struct ExpenseFormView: View {
         }
     }
     
+    private var locationSection: some View {
+        Section {
+            LocationPickerView(
+                selectedLocationName: $selectedLocationName,
+                selectedLatitude: $selectedLatitude,
+                selectedLongitude: $selectedLongitude
+            )
+        }
+    }
+    
     private var additionalInfoSection: some View {
         Section(header: Text("追加情報")) {
             TextField("タグ（カンマ区切り）", text: $tags)
@@ -530,6 +544,17 @@ struct ExpenseFormView: View {
         
         if !tags.isEmpty {
             expense.tags = tags
+        }
+        
+        // 位置情報を保存
+        if let locationName = selectedLocationName {
+            expense.locationName = locationName
+        }
+        if let latitude = selectedLatitude {
+            expense.locationLatitude = latitude
+        }
+        if let longitude = selectedLongitude {
+            expense.locationLongitude = longitude
         }
         
         // 支払情報を保存

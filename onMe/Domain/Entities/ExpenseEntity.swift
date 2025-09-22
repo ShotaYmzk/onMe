@@ -20,6 +20,9 @@ struct ExpenseEntity: Identifiable, Hashable {
     let payments: [ExpensePaymentEntity]
     let participants: [ExpenseParticipantEntity]
     let isActive: Bool
+    let locationName: String?
+    let locationLatitude: Double?
+    let locationLongitude: Double?
     
     init(id: UUID = UUID(),
          amount: Decimal,
@@ -32,7 +35,10 @@ struct ExpenseEntity: Identifiable, Hashable {
          groupId: UUID,
          payments: [ExpensePaymentEntity] = [],
          participants: [ExpenseParticipantEntity] = [],
-         isActive: Bool = true) {
+         isActive: Bool = true,
+         locationName: String? = nil,
+         locationLatitude: Double? = nil,
+         locationLongitude: Double? = nil) {
         self.id = id
         self.amount = amount
         self.currency = currency
@@ -45,6 +51,9 @@ struct ExpenseEntity: Identifiable, Hashable {
         self.payments = payments
         self.participants = participants
         self.isActive = isActive
+        self.locationName = locationName
+        self.locationLatitude = locationLatitude
+        self.locationLongitude = locationLongitude
     }
 }
 

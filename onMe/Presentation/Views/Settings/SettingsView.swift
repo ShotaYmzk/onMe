@@ -124,7 +124,165 @@ struct SettingsView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
-                )\n                \n                Divider()\n                    .padding(.leading, 50)\n                \n                SettingsRowView(\n                    icon: \"arrow.triangle.2.circlepath.circle.fill\",\n                    iconColor: .blue,\n                    title: \"為替レート\",\n                    subtitle: appState.lastExchangeRateUpdate != nil ? \"最終更新: \\(formatLastUpdate(appState.lastExchangeRateUpdate!))\": \"未更新\",\n                    action: { showingExchangeRates = true },\n                    trailing: {\n                        HStack(spacing: 8) {\n                            if appState.isLoadingExchangeRates {\n                                ProgressView()\n                                    .scaleEffect(0.8)\n                            } else {\n                                Image(systemName: \"chevron.right\")\n                                    .font(.caption)\n                                    .foregroundColor(.secondary)\n                            }\n                        }\n                    }\n                )\n            }\n        }\n    }\n    \n    private var modernAppearanceSection: some View {\n        SettingsSectionView(title: \"外観\", icon: \"paintbrush.fill\", color: .purple) {\n            VStack(spacing: 0) {\n                SettingsRowView(\n                    icon: \"moon.circle.fill\",\n                    iconColor: .indigo,\n                    title: \"ダークモード\",\n                    subtitle: \"システム設定に従う\",\n                    action: {\n                        appState.isDarkModeEnabled.toggle()\n                    },\n                    trailing: {\n                        Toggle(\"\", isOn: $appState.isDarkModeEnabled)\n                            .labelsHidden()\n                    }\n                )\n            }\n        }\n    }\n    \n    private var modernDataSection: some View {\n        SettingsSectionView(title: \"データ管理\", icon: \"externaldrive.fill\", color: .orange) {\n            VStack(spacing: 0) {\n                SettingsRowView(\n                    icon: \"square.and.arrow.up.circle.fill\",\n                    iconColor: .blue,\n                    title: \"データエクスポート\",\n                    subtitle: \"支出データをCSV形式で出力\",\n                    action: { exportData() },\n                    trailing: {\n                        Image(systemName: \"chevron.right\")\n                            .font(.caption)\n                            .foregroundColor(.secondary)\n                    }\n                )\n                \n                Divider()\n                    .padding(.leading, 50)\n                \n                SettingsRowView(\n                    icon: \"trash.circle.fill\",\n                    iconColor: .red,\n                    title: \"データをクリア\",\n                    subtitle: \"すべての支出データを削除\",\n                    action: { clearAllData() },\n                    trailing: {\n                        Image(systemName: \"chevron.right\")\n                            .font(.caption)\n                            .foregroundColor(.secondary)\n                    }\n                )\n            }\n        }\n    }\n    \n    private var modernAboutSection: some View {\n        SettingsSectionView(title: \"アプリについて\", icon: \"info.circle.fill\", color: .gray) {\n            VStack(spacing: 0) {\n                SettingsRowView(\n                    icon: \"doc.text.circle.fill\",\n                    iconColor: .blue,\n                    title: \"onMeについて\",\n                    subtitle: \"バージョン 1.0.0\",\n                    action: { showingAbout = true },\n                    trailing: {\n                        Image(systemName: \"chevron.right\")\n                            .font(.caption)\n                            .foregroundColor(.secondary)\n                    }\n                )\n                \n                Divider()\n                    .padding(.leading, 50)\n                \n                SettingsRowView(\n                    icon: \"star.circle.fill\",\n                    iconColor: .yellow,\n                    title: \"App Storeでレビュー\",\n                    subtitle: \"アプリの評価をお願いします\",\n                    action: { openAppStore() },\n                    trailing: {\n                        Image(systemName: \"arrow.up.right\")\n                            .font(.caption)\n                            .foregroundColor(.secondary)\n                    }\n                )\n                \n                Divider()\n                    .padding(.leading, 50)\n                \n                SettingsRowView(\n                    icon: \"envelope.circle.fill\",\n                    iconColor: .green,\n                    title: \"フィードバック\",\n                    subtitle: \"ご意見・ご要望をお聞かせください\",\n                    action: { sendFeedback() },\n                    trailing: {\n                        Image(systemName: \"arrow.up.right\")\n                            .font(.caption)\n                            .foregroundColor(.secondary)\n                    }\n                )\n            }\n        }\n    }\n    \n    // MARK: - Actions\n    \n    private func exportData() {\n        // データエクスポート処理を実装\n    }\n    \n    private func clearAllData() {\n        // データクリア処理を実装\n    }\n    \n    private func openAppStore() {\n        if let url = URL(string: \"https://apps.apple.com/app/id123456789\") {\n            UIApplication.shared.open(url)\n        }\n    }\n    \n    private func sendFeedback() {\n        if let url = URL(string: \"mailto:feedback@onme-app.com?subject=onMe%20Feedback\") {\n            UIApplication.shared.open(url)\n        }\n    }\n    \n    // MARK: - Legacy Sections (for reference)\n    \n    private var generalSection: some View {"}
+                )
+                
+                Divider()
+                    .padding(.leading, 50)
+                
+                SettingsRowView(
+                    icon: "arrow.triangle.2.circlepath.circle.fill",
+                    iconColor: .blue,
+                    title: "為替レート",
+                    subtitle: appState.lastExchangeRateUpdate != nil ? "最終更新: \(formatLastUpdate(appState.lastExchangeRateUpdate!))" : "未更新",
+                    action: { showingExchangeRates = true },
+                    trailing: {
+                        HStack(spacing: 8) {
+                            if appState.isLoadingExchangeRates {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    }
+    
+    private var modernAppearanceSection: some View {
+        SettingsSectionView(title: "外観", icon: "paintbrush.fill", color: .purple) {
+            VStack(spacing: 0) {
+                SettingsRowView(
+                    icon: "moon.circle.fill",
+                    iconColor: .indigo,
+                    title: "ダークモード",
+                    subtitle: "システム設定に従う",
+                    action: {
+                        appState.isDarkModeEnabled.toggle()
+                    },
+                    trailing: {
+                        Toggle("", isOn: $appState.isDarkModeEnabled)
+                            .labelsHidden()
+                    }
+                )
+            }
+        }
+    }
+    
+    private var modernDataSection: some View {
+        SettingsSectionView(title: "データ管理", icon: "externaldrive.fill", color: .orange) {
+            VStack(spacing: 0) {
+                SettingsRowView(
+                    icon: "square.and.arrow.up.circle.fill",
+                    iconColor: .blue,
+                    title: "データエクスポート",
+                    subtitle: "支出データをCSV形式で出力",
+                    action: { exportData() },
+                    trailing: {
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                )
+                
+                Divider()
+                    .padding(.leading, 50)
+                
+                SettingsRowView(
+                    icon: "trash.circle.fill",
+                    iconColor: .red,
+                    title: "データをクリア",
+                    subtitle: "すべての支出データを削除",
+                    action: { clearAllData() },
+                    trailing: {
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                )
+            }
+        }
+    }
+    
+    private var modernAboutSection: some View {
+        SettingsSectionView(title: "アプリについて", icon: "info.circle.fill", color: .gray) {
+            VStack(spacing: 0) {
+                SettingsRowView(
+                    icon: "doc.text.circle.fill",
+                    iconColor: .blue,
+                    title: "onMeについて",
+                    subtitle: "バージョン 1.0.0",
+                    action: { showingAbout = true },
+                    trailing: {
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                )
+                
+                Divider()
+                    .padding(.leading, 50)
+                
+                SettingsRowView(
+                    icon: "star.circle.fill",
+                    iconColor: .yellow,
+                    title: "App Storeでレビュー",
+                    subtitle: "アプリの評価をお願いします",
+                    action: { openAppStore() },
+                    trailing: {
+                        Image(systemName: "arrow.up.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                )
+                
+                Divider()
+                    .padding(.leading, 50)
+                
+                SettingsRowView(
+                    icon: "envelope.circle.fill",
+                    iconColor: .green,
+                    title: "フィードバック",
+                    subtitle: "ご意見・ご要望をお聞かせください",
+                    action: { sendFeedback() },
+                    trailing: {
+                        Image(systemName: "arrow.up.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                )
+            }
+        }
+    }
+    
+    // MARK: - Actions
+    
+    private func exportData() {
+        // データエクスポート処理を実装
+    }
+    
+    private func clearAllData() {
+        // データクリア処理を実装
+    }
+    
+    private func openAppStore() {
+        if let url = URL(string: "https://apps.apple.com/app/id123456789") {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    private func sendFeedback() {
+        if let url = URL(string: "mailto:feedback@onme-app.com?subject=onMe%20Feedback") {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    // MARK: - Legacy Sections (for reference)
+    
+    private var generalSection: some View {
         Section(header: Text("一般")) {
             HStack {
                 Image(systemName: "yensign.circle")
@@ -313,62 +471,6 @@ struct SettingsView: View {
     }
 }
 
-struct CurrencyPickerView: View {
-    @Binding var selectedCurrency: String
-    @Environment(\.dismiss) private var dismiss
-    
-    private let currencies = [
-        ("JPY", "日本円", "¥"),
-        ("USD", "米ドル", "$"),
-        ("EUR", "ユーロ", "€"),
-        ("GBP", "英ポンド", "£"),
-        ("KRW", "韓国ウォン", "₩"),
-        ("CNY", "中国元", "¥"),
-        ("THB", "タイバーツ", "฿"),
-        ("SGD", "シンガポールドル", "S$"),
-        ("HKD", "香港ドル", "HK$"),
-        ("AUD", "豪ドル", "A$")
-    ]
-    
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(currencies, id: \.0) { currency in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(currency.1)
-                                .font(.body)
-                            Text("\(currency.0) (\(currency.2))")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        Spacer()
-                        
-                        if selectedCurrency == currency.0 {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedCurrency = currency.0
-                        dismiss()
-                    }
-                }
-            }
-            .navigationTitle("通貨を選択")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("完了") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
 
 struct AboutView: View {
     @Environment(\.dismiss) private var dismiss

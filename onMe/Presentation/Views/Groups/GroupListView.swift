@@ -108,18 +108,14 @@ struct GroupListView: View {
                     ScrollView {
                         LazyVStack(spacing: 12) {
                             ForEach(groups, id: \.id) { group in
-                                Button(action: {
-                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                        appState.selectGroup(group)
-                                    }
-                                }) {
+                                NavigationLink(destination: GroupDetailView(group: group)) {
                                     ModernGroupCardView(group: group, onManageMembers: {
                                         selectedGroupForManagement = group
                                     }, onShare: {
                                         selectedGroupForSharing = group
                                     })
                                 }
-                                .buttonStyle(ScaleButtonStyle())
+                                .buttonStyle(PlainButtonStyle())
                             }
                         }
                         .padding(.horizontal, 20)
