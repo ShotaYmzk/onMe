@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  onMe
+//  TravelSettle
 //
 //  Created by 山﨑彰太 on 2025/09/22.
 //
@@ -8,17 +8,45 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var appState: AppState
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView(selection: $appState.selectedTab) {
+            GroupListView()
+                .tabItem {
+                    Image(systemName: "person.3.fill")
+                    Text("グループ")
+                }
+                .tag(AppState.Tab.groups)
+            
+            ExpenseListView()
+                .tabItem {
+                    Image(systemName: "creditcard.fill")
+                    Text("支出")
+                }
+                .tag(AppState.Tab.expenses)
+            
+            SettlementView()
+                .tabItem {
+                    Image(systemName: "arrow.left.arrow.right")
+                    Text("清算")
+                }
+                .tag(AppState.Tab.settlements)
+            
+            SettingsView()
+                .tabItem {
+                    Image(systemName: "gear")
+                    Text("設定")
+                }
+                .tag(AppState.Tab.settings)
         }
-        .padding()
+        .accentColor(.blue)
+        .preferredColorScheme(appState.isDarkModeEnabled ? .dark : .light)
     }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(AppState())
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }

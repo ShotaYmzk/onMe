@@ -1,0 +1,103 @@
+/* 
+  Localizable.strings (English)
+  TravelSettle
+
+  Created by 山﨑彰太 on 2025/09/22.
+*/
+
+// MARK: - General Terms
+"cancel" = "Cancel";
+"done" = "Done";
+"save" = "Save";
+"delete" = "Delete";
+"edit" = "Edit";
+"add" = "Add";
+"ok" = "OK";
+"error" = "Error";
+"loading" = "Loading...";
+
+// MARK: - Tab Titles
+"tab.groups" = "Groups";
+"tab.expenses" = "Expenses";
+"tab.settlements" = "Settlements";
+"tab.settings" = "Settings";
+
+// MARK: - Group Related
+"group.create" = "Create Group";
+"group.name" = "Group Name";
+"group.currency" = "Currency";
+"group.budget" = "Budget";
+"group.startDate" = "Start Date";
+"group.endDate" = "End Date";
+"group.members" = "Members";
+"group.noGroups" = "No Groups";
+"group.noGroupsDescription" = "Create a new group to start\nmanaging travel expenses";
+
+// MARK: - Expense Related
+"expense.add" = "Add Expense";
+"expense.description" = "Expense Description";
+"expense.amount" = "Amount";
+"expense.category" = "Category";
+"expense.participants" = "Participants";
+"expense.payers" = "Payers";
+"expense.receipt" = "Receipt";
+"expense.tags" = "Tags";
+"expense.noExpenses" = "No Expenses";
+"expense.noExpensesDescription" = "Add a new expense to start\nrecording your travel costs";
+
+// MARK: - Expense Categories
+"expense.category.food" = "Food";
+"expense.category.transportation" = "Transportation";
+"expense.category.accommodation" = "Accommodation";
+"expense.category.entertainment" = "Entertainment";
+"expense.category.shopping" = "Shopping";
+"expense.category.other" = "Other";
+
+// MARK: - Settlement Related
+"settlement.suggestions" = "Payment Suggestions";
+"settlement.history" = "Settlement History";
+"settlement.balance" = "Balance";
+"settlement.completed" = "Completed";
+"settlement.pending" = "Pending";
+"settlement.markCompleted" = "Mark as Paid";
+"settlement.allSettled" = "All settlements completed";
+
+// MARK: - Settings Related
+"settings.general" = "General";
+"settings.appearance" = "Appearance";
+"settings.data" = "Data";
+"settings.about" = "About";
+"settings.currency" = "Default Currency";
+"settings.notifications" = "Notifications";
+"settings.darkMode" = "Dark Mode";
+"settings.accessibility" = "Accessibility";
+"settings.export" = "Export Data";
+"settings.deleteAll" = "Delete All Data";
+
+// MARK: - OCR Related
+"ocr.processing" = "Processing receipt...";
+"ocr.error.invalidImage" = "Invalid image";
+"ocr.error.noTextFound" = "No text found";
+"ocr.error.processingFailed" = "Processing failed";
+
+// MARK: - Error Messages
+"error.groupCreationFailed" = "Failed to create group";
+"error.expenseCreationFailed" = "Failed to add expense";
+"error.settlementFailed" = "Failed to record settlement";
+"error.dataLoadFailed" = "Failed to load data";
+"error.dataSaveFailed" = "Failed to save data";
+
+// MARK: - Accessibility
+"accessibility.groupCard" = "%@, %d members, total expenses %@ %@";
+"accessibility.expenseCard" = "%@, %@, %@ %@";
+"accessibility.balanceCard" = "%@, %@ %@";
+"accessibility.settlementSuggestion" = "%@ owes %@ %@ %@";
+
+// MARK: - Currency
+"currency.jpy" = "Japanese Yen";
+"currency.usd" = "US Dollar";
+"currency.eur" = "Euro";
+"currency.gbp" = "British Pound";
+"currency.krw" = "Korean Won";
+"currency.cny" = "Chinese Yuan";
+"currency.thb" = "Thai Baht";

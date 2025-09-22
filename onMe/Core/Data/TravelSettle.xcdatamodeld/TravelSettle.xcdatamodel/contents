@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22758" systemVersion="23F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="Expense" representedClassName="Expense" syncable="YES" codeGenerationType="class">
+        <attribute name="amount" optional="NO" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="createdDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="currency" optional="NO" attributeType="String" defaultValueString="JPY"/>
+        <attribute name="desc" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="imageData" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <attribute name="isActive" optional="NO" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="tags" optional="YES" attributeType="String"/>
+        <relationship name="group" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="TravelGroup" inverseName="expenses" inverseEntity="TravelGroup"/>
+        <relationship name="participants" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ExpenseParticipant" inverseName="expense" inverseEntity="ExpenseParticipant"/>
+        <relationship name="payments" optional="YES" toMany="YES" deletionRule="Cascade" destinationRule="Cascade" destinationEntity="ExpensePayment" inverseName="expense" inverseEntity="ExpensePayment"/>
+    </entity>
+    <entity name="ExpenseParticipant" representedClassName="ExpenseParticipant" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="shareAmount" optional="NO" attributeType="Decimal" defaultValueString="0.0"/>
+        <relationship name="expense" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="Expense" inverseName="participants" inverseEntity="Expense"/>
+        <relationship name="member" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="GroupMember" inverseName="expenseParticipations" inverseEntity="GroupMember"/>
+    </entity>
+    <entity name="ExpensePayment" representedClassName="ExpensePayment" syncable="YES" codeGenerationType="class">
+        <attribute name="amount" optional="NO" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="expense" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="Expense" inverseName="payments" inverseEntity="Expense"/>
+        <relationship name="payer" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="GroupMember" inverseName="expensePayments" inverseEntity="GroupMember"/>
+    </entity>
+    <entity name="GroupMember" representedClassName="GroupMember" syncable="YES" codeGenerationType="class">
+        <attribute name="avatarData" optional="YES" attributeType="Binary"/>
+        <attribute name="createdDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isActive" optional="NO" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <relationship name="expenseParticipations" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ExpenseParticipant" inverseName="member" inverseEntity="ExpenseParticipant"/>
+        <relationship name="expensePayments" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ExpensePayment" inverseName="payer" inverseEntity="ExpensePayment"/>
+        <relationship name="group" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="TravelGroup" inverseName="members" inverseEntity="TravelGroup"/>
+        <relationship name="receivedSettlements" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Settlement" inverseName="receiver" inverseEntity="Settlement"/>
+        <relationship name="sentSettlements" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Settlement" inverseName="payer" inverseEntity="Settlement"/>
+    </entity>
+    <entity name="Settlement" representedClassName="Settlement" syncable="YES" codeGenerationType="class">
+        <attribute name="amount" optional="NO" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="createdDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isCompleted" optional="NO" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="note" optional="YES" attributeType="String"/>
+        <attribute name="settledDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="group" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="TravelGroup" inverseName="settlements" inverseEntity="TravelGroup"/>
+        <relationship name="payer" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="GroupMember" inverseName="sentSettlements" inverseEntity="GroupMember"/>
+        <relationship name="receiver" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="GroupMember" inverseName="receivedSettlements" inverseEntity="GroupMember"/>
+    </entity>
+    <entity name="TravelGroup" representedClassName="TravelGroup" syncable="YES" codeGenerationType="class">
+        <attribute name="budget" optional="YES" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="createdDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="currency" optional="NO" attributeType="String" defaultValueString="JPY"/>
+        <attribute name="endDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isActive" optional="NO" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="startDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="expenses" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Expense" inverseName="group" inverseEntity="Expense"/>
+        <relationship name="members" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="GroupMember" inverseName="group" inverseEntity="GroupMember"/>
+        <relationship name="settlements" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Settlement" inverseName="group" inverseEntity="Settlement"/>
+    </entity>
+</model>

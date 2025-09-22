@@ -1,0 +1,103 @@
+/* 
+  Localizable.strings
+  TravelSettle
+
+  Created by 山﨑彰太 on 2025/09/22.
+*/
+
+// MARK: - 一般的な用語
+"cancel" = "キャンセル";
+"done" = "完了";
+"save" = "保存";
+"delete" = "削除";
+"edit" = "編集";
+"add" = "追加";
+"ok" = "OK";
+"error" = "エラー";
+"loading" = "読み込み中...";
+
+// MARK: - タブタイトル
+"tab.groups" = "グループ";
+"tab.expenses" = "支出";
+"tab.settlements" = "清算";
+"tab.settings" = "設定";
+
+// MARK: - グループ関連
+"group.create" = "グループを作成";
+"group.name" = "グループ名";
+"group.currency" = "通貨";
+"group.budget" = "予算";
+"group.startDate" = "開始日";
+"group.endDate" = "終了日";
+"group.members" = "メンバー";
+"group.noGroups" = "グループがありません";
+"group.noGroupsDescription" = "新しいグループを作成して\n旅行の支出管理を始めましょう";
+
+// MARK: - 支出関連
+"expense.add" = "支出を登録";
+"expense.description" = "支出の説明";
+"expense.amount" = "金額";
+"expense.category" = "カテゴリ";
+"expense.participants" = "参加者";
+"expense.payers" = "支払者";
+"expense.receipt" = "レシート";
+"expense.tags" = "タグ";
+"expense.noExpenses" = "支出がありません";
+"expense.noExpensesDescription" = "新しい支出を登録して\n旅行の記録を始めましょう";
+
+// MARK: - 支出カテゴリ
+"expense.category.food" = "食事";
+"expense.category.transportation" = "交通費";
+"expense.category.accommodation" = "宿泊費";
+"expense.category.entertainment" = "娯楽";
+"expense.category.shopping" = "ショッピング";
+"expense.category.other" = "その他";
+
+// MARK: - 清算関連
+"settlement.suggestions" = "返済提案";
+"settlement.history" = "清算履歴";
+"settlement.balance" = "残高";
+"settlement.completed" = "清算済み";
+"settlement.pending" = "未清算";
+"settlement.markCompleted" = "返済完了";
+"settlement.allSettled" = "すべて清算済みです";
+
+// MARK: - 設定関連
+"settings.general" = "一般";
+"settings.appearance" = "表示";
+"settings.data" = "データ";
+"settings.about" = "アプリについて";
+"settings.currency" = "デフォルト通貨";
+"settings.notifications" = "通知";
+"settings.darkMode" = "ダークモード";
+"settings.accessibility" = "アクセシビリティ";
+"settings.export" = "データのエクスポート";
+"settings.deleteAll" = "すべてのデータを削除";
+
+// MARK: - OCR関連
+"ocr.processing" = "レシートを解析中...";
+"ocr.error.invalidImage" = "無効な画像です";
+"ocr.error.noTextFound" = "テキストが見つかりませんでした";
+"ocr.error.processingFailed" = "処理に失敗しました";
+
+// MARK: - エラーメッセージ
+"error.groupCreationFailed" = "グループの作成に失敗しました";
+"error.expenseCreationFailed" = "支出の登録に失敗しました";
+"error.settlementFailed" = "清算の記録に失敗しました";
+"error.dataLoadFailed" = "データの読み込みに失敗しました";
+"error.dataSaveFailed" = "データの保存に失敗しました";
+
+// MARK: - アクセシビリティ
+"accessibility.groupCard" = "%@, %d人, 支出合計 %@ %@";
+"accessibility.expenseCard" = "%@, %@, %@ %@";
+"accessibility.balanceCard" = "%@, %@ %@";
+"accessibility.settlementSuggestion" = "%@から%@へ %@ %@の返済";
+
+// MARK: - 通貨
+"currency.jpy" = "日本円";
+"currency.usd" = "米ドル";
+"currency.eur" = "ユーロ";
+"currency.gbp" = "英ポンド";
+"currency.krw" = "韓国ウォン";
+"currency.cny" = "中国元";
+"currency.thb" = "タイバーツ";
