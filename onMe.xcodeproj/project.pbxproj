@@ -40,6 +40,9 @@
 		5157B6C22E813B55007E633D /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 5157B6BF2E813B55007E633D /* README.md */; };
 		5157B6D12E813C00007E633D /* TravelSettleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6BD2E813B55007E633D /* TravelSettleTests.swift */; };
 		5157B6D22E813C00007E633D /* TravelSettleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6BB2E813B55007E633D /* TravelSettleUITests.swift */; };
+		5157B6DF2E8175B3007E633D /* CurrencyConversionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6DD2E8175B3007E633D /* CurrencyConversionView.swift */; };
+		5157B6E22E8175E6007E633D /* ExchangeRateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6E02E8175E6007E633D /* ExchangeRateService.swift */; };
+		5157B6E42E817604007E633D /* CurrencyConverterUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6E32E817604007E633D /* CurrencyConverterUseCase.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +99,9 @@
 		5157B6BF2E813B55007E633D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		5157B6C52E813C00007E633D /* onMeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = onMeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5157B6C62E813C00007E633D /* onMeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = onMeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5157B6DD2E8175B3007E633D /* CurrencyConversionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrencyConversionView.swift; sourceTree = "<group>"; };
+		5157B6E02E8175E6007E633D /* ExchangeRateService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExchangeRateService.swift; sourceTree = "<group>"; };
+		5157B6E32E817604007E633D /* CurrencyConverterUseCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrencyConverterUseCase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -226,6 +232,7 @@
 		5157B6812E813B45007E633D /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5157B6DE2E8175B3007E633D /* Components */,
 				5157B6742E813B45007E633D /* Camera */,
 				5157B6782E813B45007E633D /* Expenses */,
 				5157B67B2E813B45007E633D /* Groups */,
@@ -257,6 +264,7 @@
 		5157B6882E813B45007E633D /* UseCases */ = {
 			isa = PBXGroup;
 			children = (
+				5157B6E32E817604007E633D /* CurrencyConverterUseCase.swift */,
 				5157B6872E813B45007E633D /* SettlementCalculationUseCase.swift */,
 			);
 			path = UseCases;
@@ -334,6 +342,7 @@
 		5157B69D2E813B45007E633D /* Infrastructure */ = {
 			isa = PBXGroup;
 			children = (
+				5157B6E12E8175E6007E633D /* Currency */,
 				5157B6972E813B45007E633D /* OCR */,
 				5157B69A2E813B45007E633D /* Performance */,
 				5157B69C2E813B45007E633D /* Security */,
@@ -363,6 +372,22 @@
 				5157B6BD2E813B55007E633D /* TravelSettleTests.swift */,
 			);
 			path = onMeTests;
+			sourceTree = "<group>";
+		};
+		5157B6DE2E8175B3007E633D /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				5157B6DD2E8175B3007E633D /* CurrencyConversionView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		5157B6E12E8175E6007E633D /* Currency */ = {
+			isa = PBXGroup;
+			children = (
+				5157B6E02E8175E6007E633D /* ExchangeRateService.swift */,
+			);
+			path = Currency;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -504,6 +529,8 @@
 				5157B6A42E813B45007E633D /* ExpenseDetailView.swift in Sources */,
 				5157B6AC2E813B45007E633D /* ExpenseEntity.swift in Sources */,
 				5157B6A72E813B45007E633D /* CreateGroupView.swift in Sources */,
+				5157B6E22E8175E6007E633D /* ExchangeRateService.swift in Sources */,
+				5157B6E42E817604007E633D /* CurrencyConverterUseCase.swift in Sources */,
 				5157B6B92E813B45007E633D /* DataEncryption.swift in Sources */,
 				5157B6B82E813B45007E633D /* PerformanceMonitor.swift in Sources */,
 				5157B6AE2E813B45007E633D /* SettlementEntity.swift in Sources */,
@@ -522,6 +549,7 @@
 				5157B6AA2E813B45007E633D /* SettlementDetailView.swift in Sources */,
 				5157B6622E8136D2007E633D /* onMeApp.swift in Sources */,
 				5157B6A62E813B45007E633D /* ExpenseListView.swift in Sources */,
+				5157B6DF2E8175B3007E633D /* CurrencyConversionView.swift in Sources */,
 				5157B6B12E813B45007E633D /* TravelSettle.xcdatamodeld in Sources */,
 				5157B6A92E813B45007E633D /* SettingsView.swift in Sources */,
 			);
@@ -700,15 +728,15 @@
 				DEVELOPMENT_TEAM = 6NN85W4UYF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TravelSettle;
+				INFOPLIST_KEY_NSCameraUsageDescription = "レシートを撮影して支出を自動登録するためにカメラへのアクセスが必要です";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "TravelSettleのデータにアクセスするためにFace IDを使用します";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "レシート画像を選択して支出を登録するためにフォトライブラリへのアクセスが必要です";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_CFBundleDisplayName = TravelSettle;
-				INFOPLIST_KEY_NSCameraUsageDescription = "レシートを撮影して支出を自動登録するためにカメラへのアクセスが必要です";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "TravelSettleのデータにアクセスするためにFace IDを使用します";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "レシート画像を選択して支出を登録するためにフォトライブラリへのアクセスが必要です";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -734,15 +762,15 @@
 				DEVELOPMENT_TEAM = 6NN85W4UYF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TravelSettle;
+				INFOPLIST_KEY_NSCameraUsageDescription = "レシートを撮影して支出を自動登録するためにカメラへのアクセスが必要です";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "TravelSettleのデータにアクセスするためにFace IDを使用します";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "レシート画像を選択して支出を登録するためにフォトライブラリへのアクセスが必要です";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_CFBundleDisplayName = TravelSettle;
-				INFOPLIST_KEY_NSCameraUsageDescription = "レシートを撮影して支出を自動登録するためにカメラへのアクセスが必要です";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "TravelSettleのデータにアクセスするためにFace IDを使用します";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "レシート画像を選択して支出を登録するためにフォトライブラリへのアクセスが必要です";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

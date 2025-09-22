@@ -9,8 +9,8 @@ import Foundation
 
 struct ExpenseEntity: Identifiable, Hashable {
     let id: UUID
-    let amount: Decimal
-    let currency: String
+    var amount: Decimal
+    var currency: String
     let description: String?
     let category: ExpenseCategory
     let createdDate: Date

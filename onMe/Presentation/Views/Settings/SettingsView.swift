@@ -13,6 +13,14 @@ struct SettingsView: View {
     @State private var showingLanguagePicker = false
     @State private var showingAbout = false
     
+    private func formatLastUpdate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        formatter.locale = Locale(identifier: "ja_JP")
+        return formatter.string(from: date)
+    }
+    
     var body: some View {
         NavigationView {
             List {
@@ -46,6 +54,50 @@ struct SettingsView: View {
                     showingCurrencyPicker = true
                 }
                 .foregroundColor(.blue)
+            }
+            
+            // 為替レート情報
+            VStack(alignment: .leading) {
+                HStack {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .foregroundColor(.blue)
+                        .frame(width: 24)
+                    
+                    Text("為替レート")
+                    
+                    Spacer()
+                    
+                    if appState.isLoadingExchangeRates {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    } else {
+                        Button("更新") {
+                            appState.loadExchangeRates()
+                        }
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    }
+                }
+                
+                if let lastUpdate = appState.lastExchangeRateUpdate {
+                    Text("最終更新: \(formatLastUpdate(lastUpdate))")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 32)
+                }
+                
+                // 主要通貨の為替レート表示
+                if !appState.exchangeRates.isEmpty && appState.preferredCurrency != "USD" {
+                    VStack(alignment: .leading, spacing: 2) {
+                        ExchangeRateDisplayView(fromCurrency: "USD", toCurrency: appState.preferredCurrency)
+                            .padding(.leading, 32)
+                        
+                        if appState.preferredCurrency != "JPY" {
+                            ExchangeRateDisplayView(fromCurrency: "JPY", toCurrency: appState.preferredCurrency)
+                                .padding(.leading, 32)
+                        }
+                    }
+                }
             }
             
             HStack {
