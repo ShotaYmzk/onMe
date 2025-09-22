@@ -33,7 +33,9 @@ struct ExpenseListView: View {
         NavigationView {
             VStack {
                 if appState.selectedGroup == nil {
-                    NoGroupSelectedView()
+                    NoGroupSelectedView {
+                        showingExpenseForm = true
+                    }
                 } else if filteredExpenses.isEmpty {
                     EmptyExpensesView {
                         showingExpenseForm = true
@@ -59,27 +61,23 @@ struct ExpenseListView: View {
             }
             .navigationTitle(appState.selectedGroup?.name ?? "支出")
             .toolbar {
-                if appState.selectedGroup != nil {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: { showingExpenseForm = true }) {
-                            Image(systemName: "plus")
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                        }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showingExpenseForm = true }) {
+                        Image(systemName: "plus")
+                            .font(.title3)
+                            .fontWeight(.semibold)
                     }
-                    
-                    if !filteredExpenses.isEmpty {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            EditButton()
-                                .fontWeight(.medium)
-                        }
+                }
+                
+                if appState.selectedGroup != nil && !filteredExpenses.isEmpty {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        EditButton()
+                            .fontWeight(.medium)
                     }
                 }
             }
             .sheet(isPresented: $showingExpenseForm) {
-                if let group = appState.selectedGroup {
-                    ExpenseFormView(group: group)
-                }
+                ExpenseFormView(preselectedGroup: appState.selectedGroup)
             }
             .sheet(item: $selectedExpense) { expense in
                 ExpenseDetailView(expense: expense)
@@ -186,23 +184,57 @@ struct ExpenseRowView: View {
 }
 
 struct NoGroupSelectedView: View {
+    let onCreateExpense: () -> Void
+    
     var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "person.3.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.secondary)
+        VStack(spacing: 24) {
+            VStack(spacing: 16) {
+                Image(systemName: "person.3.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.secondary)
+                
+                VStack(spacing: 8) {
+                    Text("グループを選択してください")
+                        .font(.title2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    Text("グループタブからグループを選択すると\nそのグループの支出を表示できます")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+            }
             
-            Text("グループを選択してください")
-                .font(.title2)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
-            
-            Text("グループタブからグループを選択すると\nそのグループの支出を表示できます")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+            VStack(spacing: 12) {
+                Text("または")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Button(action: onCreateExpense) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title3)
+                        Text("新しい支出を登録")
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+                    .shadow(color: Color.blue.opacity(0.3), radius: 4, x: 0, y: 2)
+                }
+            }
         }
-        .padding()
+        .padding(.horizontal, 32)
+        .padding(.vertical, 40)
     }
 }
 

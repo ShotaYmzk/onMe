@@ -7,9 +7,16 @@
 
 import SwiftUI
 import PhotosUI
+import CoreData
 
 struct ExpenseFormView: View {
-    let group: TravelGroup
+    let group: TravelGroup?
+    let preselectedGroup: TravelGroup?
+    
+    init(group: TravelGroup? = nil, preselectedGroup: TravelGroup? = nil) {
+        self.group = group
+        self.preselectedGroup = preselectedGroup
+    }
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.managedObjectContext) private var viewContext
@@ -28,11 +35,32 @@ struct ExpenseFormView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var isProcessingOCR = false
+    @State private var selectedGroupId: UUID?
     
     private let ocrService = ReceiptOCRService()
     
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \TravelGroup.name, ascending: true)],
+        predicate: NSPredicate(format: "isActive == YES"),
+        animation: .default
+    )
+    private var availableGroups: FetchedResults<TravelGroup>
+    
+    private var currentGroup: TravelGroup? {
+        if let group = group {
+            return group
+        }
+        if let selectedGroupId = selectedGroupId {
+            return availableGroups.first { $0.id == selectedGroupId }
+        }
+        if let preselectedGroup = preselectedGroup {
+            return preselectedGroup
+        }
+        return availableGroups.first
+    }
+    
     private var members: [GroupMember] {
-        group.members?.allObjects
+        currentGroup?.members?.allObjects
             .compactMap { $0 as? GroupMember }
             .filter { $0.isActive } ?? []
     }
@@ -48,6 +76,9 @@ struct ExpenseFormView: View {
     var body: some View {
         NavigationView {
             Form {
+                if group == nil {
+                    groupSelectionSection
+                }
                 basicInfoSection
                 amountSection
                 participantsSection
@@ -92,12 +123,35 @@ struct ExpenseFormView: View {
                     }
                 }
             }
-            .onAppear {
-                initializeSelections()
+        .onAppear {
+            if group == nil && preselectedGroup != nil {
+                selectedGroupId = preselectedGroup?.id
             }
-            .onChange(of: amountString) { _ in
-                updatePayerSelections()
+            initializeSelections()
+        }
+        .onChange(of: amountString) { _ in
+            updatePayerSelections()
+        }
+        .onChange(of: selectedGroupId) { _ in
+            initializeSelections()
+        }
+        }
+    }
+    
+    private var groupSelectionSection: some View {
+        Section(header: Text("グループ選択")) {
+            Picker("グループ", selection: $selectedGroupId) {
+                ForEach(availableGroups, id: \.id) { group in
+                    HStack {
+                        Text(group.name ?? "")
+                        Spacer()
+                        Text(group.currency ?? "JPY")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }.tag(group.id as UUID?)
+                }
             }
+            .pickerStyle(MenuPickerStyle())
         }
     }
     
@@ -119,12 +173,12 @@ struct ExpenseFormView: View {
     
     private var amountSection: some View {
         Section(header: Text("金額")) {
-            HStack {
-                TextField("金額", text: $amountString)
-                    .keyboardType(.decimalPad)
-                Text(group.currency ?? "JPY")
-                    .foregroundColor(.secondary)
-            }
+                    HStack {
+                        TextField("金額", text: $amountString)
+                            .keyboardType(.decimalPad)
+                        Text(currentGroup?.currency ?? "JPY")
+                            .foregroundColor(.secondary)
+                    }
             
             if totalPayerAmount != totalAmount && totalAmount > 0 {
                 HStack {
@@ -175,7 +229,14 @@ struct ExpenseFormView: View {
     }
     
     private var payersSection: some View {
-        Section(header: Text("支払者"), footer: Text("各メンバーが実際に支払った金額を入力してください")) {
+        Section(header: Text("支払者"), footer: VStack(alignment: .leading, spacing: 4) {
+            Text("各メンバーが実際に支払った金額を入力してください")
+            if totalPayerAmount != totalAmount && totalAmount > 0 {
+                Text("⚠️ 支払額の合計が支出総額と一致していません")
+                    .foregroundColor(.orange)
+                    .font(.caption)
+            }
+        }) {
             ForEach(members, id: \.id) { member in
                 HStack {
                     Text(member.name ?? "")
@@ -195,7 +256,7 @@ struct ExpenseFormView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .multilineTextAlignment(.trailing)
                         
-                        Text(group.currency ?? "JPY")
+                        Text(currentGroup?.currency ?? "JPY")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .frame(width: 30, alignment: .leading)
@@ -204,22 +265,50 @@ struct ExpenseFormView: View {
                 .padding(.vertical, 2)
             }
             
-            if totalPayerAmount > 0 && totalAmount > 0 {
-                HStack {
-                    Text("合計支払額")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    
-                    Spacer()
-                    
+            HStack {
+                Text("合計支払額")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 2) {
                     Text("\(totalPayerAmount as NSDecimalNumber, formatter: currencyFormatter)")
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(totalPayerAmount == totalAmount ? .green : .red)
+                    
+                    if totalAmount > 0 {
+                        Text("目標: \(totalAmount as NSDecimalNumber, formatter: currencyFormatter)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
                 }
-                .padding(.vertical, 4)
-                .background(Color.secondary.opacity(0.1))
-                .cornerRadius(8)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(totalPayerAmount == totalAmount && totalAmount > 0 ? Color.green.opacity(0.1) : Color.orange.opacity(0.1))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(totalPayerAmount == totalAmount && totalAmount > 0 ? Color.green.opacity(0.3) : Color.orange.opacity(0.3), lineWidth: 1)
+            )
+            
+            if totalAmount > 0 && totalPayerAmount != totalAmount {
+                Button(action: distributePaymentEqually) {
+                    HStack {
+                        Image(systemName: "equal.circle.fill")
+                        Text("支払を等分する")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.blue)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(6)
+                }
             }
         }
     }
@@ -244,7 +333,7 @@ struct ExpenseFormView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .multilineTextAlignment(.trailing)
                             
-                            Text(group.currency ?? "JPY")
+                            Text(currentGroup?.currency ?? "JPY")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .frame(width: 30, alignment: .leading)
@@ -328,19 +417,24 @@ struct ExpenseFormView: View {
         let hasParticipants = !selectedMembers.isEmpty
         let paymentMatches = totalPayerAmount == totalAmount
         let customSplitValid = splitEqually || customSplits.values.reduce(0, +) == totalAmount
+        let hasValidGroup = currentGroup != nil
         
-        return hasDescription && hasValidAmount && hasParticipants && paymentMatches && customSplitValid
+        return hasDescription && hasValidAmount && hasParticipants && paymentMatches && customSplitValid && hasValidGroup
     }
     
     private func initializeSelections() {
         selectedMembers = Set(members.compactMap { $0.id })
         
-        // 最初のメンバーがすべて支払うように初期化
-        if let firstMember = members.first, totalAmount > 0 {
-            payerSelections[firstMember.id!] = totalAmount
-        } else if let firstMember = members.first {
-            // 金額が0の場合は0を設定
-            payerSelections[firstMember.id!] = 0
+        // すべてのメンバーの支払額を0で初期化
+        for member in members {
+            if let memberId = member.id {
+                payerSelections[memberId] = 0
+            }
+        }
+        
+        // 最初のメンバーがすべて支払うように初期化（金額が入力されている場合のみ）
+        if let firstMember = members.first, let firstMemberId = firstMember.id {
+            payerSelections[firstMemberId] = totalAmount
         }
     }
     
@@ -360,9 +454,14 @@ struct ExpenseFormView: View {
             if currentPayersWithAmount.count == 1, let payerId = currentPayersWithAmount.first?.key {
                 // 単一の支払者の場合、その人に全額を設定
                 payerSelections[payerId] = totalAmount
-            } else if currentPayersWithAmount.isEmpty, let firstMember = members.first {
+            } else if currentPayersWithAmount.isEmpty, let firstMember = members.first, let firstMemberId = firstMember.id {
                 // 支払者がいない場合、最初のメンバーに全額を設定
-                payerSelections[firstMember.id!] = totalAmount
+                payerSelections[firstMemberId] = totalAmount
+            }
+        } else {
+            // 金額が0の場合、すべての支払額をリセット
+            for memberId in payerSelections.keys {
+                payerSelections[memberId] = 0
             }
         }
     }
@@ -409,15 +508,21 @@ struct ExpenseFormView: View {
     }
     
     private func saveExpense() {
+        guard let currentGroup = currentGroup else {
+            alertMessage = "グループが選択されていません"
+            showingAlert = true
+            return
+        }
+        
         let expense = Expense(context: viewContext)
         expense.id = UUID()
         expense.amount = totalAmount as NSDecimalNumber
-        expense.currency = group.currency
+        expense.currency = currentGroup.currency
         expense.desc = description
         expense.category = selectedCategory.rawValue
         expense.createdDate = Date()
         expense.isActive = true
-        expense.group = group
+        expense.group = currentGroup
         
         if let imageData = receiptImage?.jpegData(compressionQuality: 0.8) {
             expense.imageData = imageData
@@ -459,9 +564,42 @@ struct ExpenseFormView: View {
             showingAlert = true
         }
     }
+    
+    private func distributePaymentEqually() {
+        guard totalAmount > 0 else { return }
+        
+        let activeMembers = members.filter { member in
+            guard let memberId = member.id else { return false }
+            return selectedMembers.contains(memberId)
+        }
+        
+        guard !activeMembers.isEmpty else { return }
+        
+        let amountPerPerson = totalAmount / Decimal(activeMembers.count)
+        
+        // すべての支払額をリセット
+        for memberId in payerSelections.keys {
+            payerSelections[memberId] = 0
+        }
+        
+        // 選択されたメンバーに等分して支払額を設定
+        for member in activeMembers {
+            if let memberId = member.id {
+                payerSelections[memberId] = amountPerPerson
+            }
+        }
+    }
+    
+    private var currencyFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 0
+        return formatter
+    }
 }
 
 #Preview {
-    ExpenseFormView(group: TravelGroup())
+    ExpenseFormView(preselectedGroup: nil)
         .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }

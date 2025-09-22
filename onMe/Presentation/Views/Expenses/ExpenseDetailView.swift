@@ -14,7 +14,9 @@ struct ExpenseDetailView: View {
     private var totalAmount: Decimal {
         expense.payments?.allObjects
             .compactMap { $0 as? ExpensePayment }
-            .reduce(0) { $0 + ($1.amount?.decimalValue ?? 0) } ?? 0
+            .reduce(0) { result, payment in
+                result + (payment.amount?.decimalValue ?? 0)
+            } ?? 0
     }
     
     private var payments: [ExpensePayment] {
@@ -147,7 +149,7 @@ struct ExpenseDetailView: View {
                     Spacer()
                     
                     VStack(alignment: .trailing) {
-                        Text("\(payment.amount ?? NSDecimalNumber.zero, formatter: currencyFormatter)")
+                        Text("\((payment.amount ?? NSDecimalNumber.zero), formatter: currencyFormatter)")
                             .font(.body)
                             .fontWeight(.medium)
                         
@@ -177,7 +179,7 @@ struct ExpenseDetailView: View {
                     Spacer()
                     
                     VStack(alignment: .trailing) {
-                        Text("\(participant.shareAmount ?? NSDecimalNumber.zero, formatter: currencyFormatter)")
+                        Text("\((participant.shareAmount ?? NSDecimalNumber.zero), formatter: currencyFormatter)")
                             .font(.body)
                             .fontWeight(.medium)
                         

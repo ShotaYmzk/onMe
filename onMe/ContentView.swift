@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var appState: AppState
+    @State private var showingExpenseForm = false
     
     var body: some View {
         TabView(selection: $appState.selectedTab) {
@@ -40,6 +41,36 @@ struct ContentView: View {
                 }
                 .tag(AppState.Tab.settings)
         }
+        .overlay(
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        showingExpenseForm = true
+                    }) {
+                        Image(systemName: "plus")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(width: 56, height: 56)
+                            .background(
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                            )
+                            .shadow(color: Color.blue.opacity(0.3), radius: 8, x: 0, y: 4)
+                    }
+                    .padding(.trailing, 20)
+                    .padding(.bottom, 90) // タブバーの上に配置
+                }
+            }
+        )
         .accentColor(.blue)
         .preferredColorScheme(appState.isDarkModeEnabled ? .dark : .light)
         .onAppear {
@@ -50,6 +81,9 @@ struct ContentView: View {
             
             UITabBar.appearance().standardAppearance = tabBarAppearance
             UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        }
+        .sheet(isPresented: $showingExpenseForm) {
+            ExpenseFormView(preselectedGroup: appState.selectedGroup)
         }
     }
 }
