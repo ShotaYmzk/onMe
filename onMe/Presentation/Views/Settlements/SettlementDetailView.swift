@@ -19,6 +19,8 @@ struct SettlementDetailView: View {
     @State private var note = ""
     @State private var showingAlert = false
     @State private var alertMessage = ""
+    @State private var customAmount: Decimal
+    @State private var isEditingAmount = false
     
     private var fromMember: GroupMember? {
         group.members?.allObjects
@@ -32,11 +34,18 @@ struct SettlementDetailView: View {
             .first { $0.id == suggestion.toMemberId }
     }
     
+    init(suggestion: SettlementSuggestion, group: TravelGroup) {
+        self.suggestion = suggestion
+        self.group = group
+        self._customAmount = State(initialValue: suggestion.amount)
+    }
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
                     settlementOverviewSection
+                    amountAdjustmentSection
                     noteSection
                     actionSection
                 }
@@ -97,7 +106,7 @@ struct SettlementDetailView: View {
                         .font(.title2)
                         .foregroundColor(.blue)
                     
-                    Text("\(suggestion.amount as NSDecimalNumber, formatter: currencyFormatter)")
+                    Text("\(customAmount as NSDecimalNumber, formatter: currencyFormatter)")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.blue)
@@ -140,10 +149,22 @@ struct SettlementDetailView: View {
                 
                 VStack(spacing: 8) {
                     HStack {
-                        Text("金額")
+                        Text("返済金額")
                         Spacer()
-                        Text("\(suggestion.amount as NSDecimalNumber, formatter: currencyFormatter) \(suggestion.currency)")
+                        Text("\(customAmount as NSDecimalNumber, formatter: currencyFormatter) \(suggestion.currency)")
                             .fontWeight(.medium)
+                    }
+                    
+                    if customAmount < suggestion.amount {
+                        Divider()
+                        
+                        HStack {
+                            Text("残債")
+                            Spacer()
+                            Text("\((suggestion.amount - customAmount) as NSDecimalNumber, formatter: currencyFormatter) \(suggestion.currency)")
+                                .fontWeight(.medium)
+                                .foregroundColor(.orange)
+                        }
                     }
                     
                     Divider()
@@ -158,6 +179,133 @@ struct SettlementDetailView: View {
                 .padding()
                 .background(Color.secondary.opacity(0.1))
                 .cornerRadius(12)
+            }
+        }
+    }
+    
+    private var amountAdjustmentSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("返済金額の調整")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            VStack(spacing: 12) {
+                // 現在の金額表示
+                HStack {
+                    Text("返済金額")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isEditingAmount.toggle()
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            Text("\(customAmount as NSDecimalNumber, formatter: currencyFormatter)")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                            Text(suggestion.currency)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Image(systemName: isEditingAmount ? "chevron.up" : "chevron.down")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                .padding()
+                .background(Color.blue.opacity(0.1))
+                .cornerRadius(12)
+                
+                if isEditingAmount {
+                    VStack(spacing: 12) {
+                        // スライダー
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("0")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("\(suggestion.amount as NSDecimalNumber, formatter: currencyFormatter)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Slider(
+                                value: Binding(
+                                    get: { Double(truncating: customAmount as NSDecimalNumber) },
+                                    set: { customAmount = Decimal($0) }
+                                ),
+                                in: 0...Double(truncating: suggestion.amount as NSDecimalNumber),
+                                step: 100
+                            )
+                            .accentColor(.blue)
+                        }
+                        
+                        // プリセット金額ボタン
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 8) {
+                            ForEach([0.25, 0.5, 0.75, 1.0], id: \.self) { ratio in
+                                Button(action: {
+                                    withAnimation(.easeInOut(duration: 0.15)) {
+                                        customAmount = suggestion.amount * Decimal(ratio)
+                                    }
+                                }) {
+                                    VStack(spacing: 2) {
+                                        Text(ratio == 1.0 ? "全額" : "\(Int(ratio * 100))%")
+                                            .font(.caption)
+                                            .fontWeight(.medium)
+                                        Text("\(Int(truncating: (suggestion.amount * Decimal(ratio)) as NSDecimalNumber))")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 4)
+                                    .frame(maxWidth: .infinity)
+                                    .background(
+                                        customAmount == suggestion.amount * Decimal(ratio) ?
+                                        Color.blue : Color.secondary.opacity(0.1)
+                                    )
+                                    .foregroundColor(
+                                        customAmount == suggestion.amount * Decimal(ratio) ?
+                                        .white : .primary
+                                    )
+                                    .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                        
+                        // カスタム金額入力
+                        HStack {
+                            Text("カスタム金額:")
+                                .font(.subheadline)
+                            TextField("金額を入力", value: $customAmount, formatter: decimalFormatter)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.numberPad)
+                            Text(suggestion.currency)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding()
+                    .background(Color.secondary.opacity(0.05))
+                    .cornerRadius(12)
+                }
+                
+                // 残債表示
+                if customAmount < suggestion.amount {
+                    HStack {
+                        Image(systemName: "info.circle")
+                            .foregroundColor(.orange)
+                        Text("残債: \((suggestion.amount - customAmount) as NSDecimalNumber, formatter: currencyFormatter) \(suggestion.currency)")
+                            .font(.subheadline)
+                            .foregroundColor(.orange)
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                }
             }
         }
     }
@@ -215,7 +363,14 @@ struct SettlementDetailView: View {
     
     private func markAsCompleted() {
         do {
-            try viewModel.markSettlementAsCompleted(suggestion, in: group, context: viewContext)
+            // カスタム金額で新しいsuggestionを作成
+            let customSuggestion = SettlementSuggestion(
+                fromMemberId: suggestion.fromMemberId,
+                toMemberId: suggestion.toMemberId,
+                amount: customAmount,
+                currency: suggestion.currency
+            )
+            try viewModel.markSettlementAsCompleted(customSuggestion, in: group, context: viewContext, note: note.isEmpty ? nil : note)
             dismiss()
         } catch {
             alertMessage = "返済の記録に失敗しました: \(error.localizedDescription)"
@@ -230,17 +385,26 @@ struct SettlementDetailView: View {
         formatter.maximumFractionDigits = 0
         return formatter
     }
+    
+    private var decimalFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 2
+        return formatter
+    }
 }
 
 #Preview {
-    SettlementDetailView(
+    let group = TravelGroup()
+    return SettlementDetailView(
         suggestion: SettlementSuggestion(
             fromMemberId: UUID(),
             toMemberId: UUID(),
             amount: 1000,
             currency: "JPY"
         ),
-        group: TravelGroup()
+        group: group
     )
     .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }

@@ -90,7 +90,7 @@ struct CreateGroupView: View {
                             if members.count > 1 {
                                 Button(action: {
                                     withAnimation(.easeInOut(duration: 0.2)) {
-                                        members.remove(at: index)
+                                        let _ = members.remove(at: index)
                                     }
                                 }) {
                                     Image(systemName: "minus.circle.fill")
@@ -116,21 +116,17 @@ struct CreateGroupView: View {
             }
             .navigationTitle("新しいグループ")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("キャンセル") {
-                        dismiss()
-                    }
+            .navigationBarBackButtonHidden(true)
+            .navigationBarItems(
+                leading: Button("キャンセル") {
+                    dismiss()
+                },
+                trailing: Button("作成") {
+                    createGroup()
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("作成") {
-                        createGroup()
-                    }
-                    .disabled(!isValidForm)
-                    .fontWeight(.semibold)
-                }
-            }
+                .disabled(!isValidForm)
+                .fontWeight(.semibold)
+            )
             .alert("エラー", isPresented: $showingAlert) {
                 Button("OK") { }
             } message: {

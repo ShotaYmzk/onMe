@@ -146,7 +146,7 @@ class SettlementViewModel: ObservableObject {
         )
     }
     
-    func markSettlementAsCompleted(_ suggestion: SettlementSuggestion, in group: TravelGroup, context: NSManagedObjectContext) throws {
+    func markSettlementAsCompleted(_ suggestion: SettlementSuggestion, in group: TravelGroup, context: NSManagedObjectContext, note: String? = nil) throws {
         let settlement = Settlement(context: context)
         settlement.id = UUID()
         settlement.amount = suggestion.amount as NSDecimalNumber
@@ -154,6 +154,7 @@ class SettlementViewModel: ObservableObject {
         settlement.settledDate = Date()
         settlement.isCompleted = true
         settlement.group = group
+        settlement.note = note
         
         // メンバーを検索して設定
         let members = group.members?.allObjects.compactMap { $0 as? GroupMember } ?? []

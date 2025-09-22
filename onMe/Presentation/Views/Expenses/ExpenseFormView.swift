@@ -91,7 +91,7 @@ struct ExpenseFormView: View {
             }
             .navigationTitle("支出を登録")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("キャンセル") { dismiss() }
                 }
@@ -102,7 +102,7 @@ struct ExpenseFormView: View {
                     }
                     .disabled(!isValidForm)
                 }
-            }
+            })
             .alert("エラー", isPresented: $showingAlert) {
                 Button("OK") { }
             } message: {

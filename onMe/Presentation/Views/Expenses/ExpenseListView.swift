@@ -60,7 +60,7 @@ struct ExpenseListView: View {
                 }
             }
             .navigationTitle(appState.selectedGroup?.name ?? "支出")
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingExpenseForm = true }) {
                         Image(systemName: "plus")
@@ -75,7 +75,7 @@ struct ExpenseListView: View {
                             .fontWeight(.medium)
                     }
                 }
-            }
+            })
             .sheet(isPresented: $showingExpenseForm) {
                 ExpenseFormView(preselectedGroup: appState.selectedGroup)
             }

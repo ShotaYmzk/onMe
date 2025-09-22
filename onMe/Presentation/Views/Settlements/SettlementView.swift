@@ -71,9 +71,17 @@ struct SettlementView: View {
     
     private var settlementSuggestionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("返済提案")
-                .font(.headline)
-                .fontWeight(.semibold)
+            HStack {
+                Text("返済提案")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                Spacer()
+                if !viewModel.settlementSuggestions.isEmpty {
+                    Text("タップして金額を調整")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                }
+            }
             
             if viewModel.settlementSuggestions.isEmpty {
                 HStack {
@@ -210,9 +218,19 @@ struct SettlementSuggestionRow: View {
                         .fontWeight(.medium)
                 }
                 
-                Text("返済提案")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                HStack {
+                    Text("返済提案")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("金額調整可能")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(4)
+                }
             }
             
             Spacer()
@@ -270,10 +288,19 @@ struct SettlementHistoryRow: View {
                         .fontWeight(.medium)
                 }
                 
-                if let date = settlement.settledDate {
-                    Text(date.formatted(date: .abbreviated, time: .omitted))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    if let date = settlement.settledDate {
+                        Text(date.formatted(date: .abbreviated, time: .omitted))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    if let note = settlement.note, !note.isEmpty {
+                        Text(note)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .italic()
+                            .lineLimit(1)
+                    }
                 }
             }
             

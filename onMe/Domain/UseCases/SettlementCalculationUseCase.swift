@@ -12,6 +12,7 @@ protocol SettlementCalculationUseCaseProtocol {
     func generateOptimalSettlements(from balances: [MemberBalance], currency: String) -> [SettlementSuggestion]
     func calculateTotalOwed(for memberId: UUID, in group: GroupEntity) -> Decimal
     func calculateTotalPaid(for memberId: UUID, in group: GroupEntity) -> Decimal
+    func adjustBalancesAfterPartialSettlement(balances: [MemberBalance], settlement: SettlementEntity) -> [MemberBalance]
 }
 
 class SettlementCalculationUseCase: SettlementCalculationUseCaseProtocol {
@@ -35,6 +36,12 @@ class SettlementCalculationUseCase: SettlementCalculationUseCaseProtocol {
             for participant in expense.participants {
                 balances[participant.memberId, default: 0] -= participant.shareAmount
             }
+        }
+        
+        // 完了済み返済を反映
+        for settlement in group.settlements.filter({ $0.isCompleted }) {
+            balances[settlement.payerId, default: 0] += settlement.amount
+            balances[settlement.receiverId, default: 0] -= settlement.amount
         }
         
         return balances.map { MemberBalance(memberId: $0.key, balance: $0.value) }
@@ -98,5 +105,17 @@ class SettlementCalculationUseCase: SettlementCalculationUseCaseProtocol {
             .flatMap { $0.payments }
             .filter { $0.payerId == memberId }
             .reduce(0) { $0 + $1.amount }
+    }
+    
+    func adjustBalancesAfterPartialSettlement(balances: [MemberBalance], settlement: SettlementEntity) -> [MemberBalance] {
+        return balances.map { balance in
+            if balance.memberId == settlement.payerId {
+                return MemberBalance(memberId: balance.memberId, balance: balance.balance + settlement.amount)
+            } else if balance.memberId == settlement.receiverId {
+                return MemberBalance(memberId: balance.memberId, balance: balance.balance - settlement.amount)
+            } else {
+                return balance
+            }
+        }
     }
 }

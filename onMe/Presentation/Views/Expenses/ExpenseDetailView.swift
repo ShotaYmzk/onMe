@@ -59,13 +59,13 @@ struct ExpenseDetailView: View {
             }
             .navigationTitle("支出詳細")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("完了") {
                         dismiss()
                     }
                 }
-            }
+            })
         }
     }
     
