@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var appState: AppState
     @State private var showingExpenseForm = false
+    @State private var showingOnboarding = false
     
     var body: some View {
         TabView(selection: $appState.selectedTab) {
@@ -84,6 +85,19 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingExpenseForm) {
             ExpenseFormView(preselectedGroup: appState.selectedGroup)
+        }
+        .fullScreenCover(isPresented: $showingOnboarding) {
+            OnboardingView()
+        }
+        .onAppear {
+            checkOnboardingStatus()
+        }
+    }
+    
+    private func checkOnboardingStatus() {
+        let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+        if !hasCompletedOnboarding {
+            showingOnboarding = true
         }
     }
 }

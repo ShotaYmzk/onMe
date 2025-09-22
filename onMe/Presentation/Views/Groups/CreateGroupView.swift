@@ -23,8 +23,9 @@ struct CreateGroupView: View {
     @State private var alertMessage = ""
     @State private var members: [String] = [""]
     @State private var showingMemberAlert = false
+    @State private var showingCurrencyPicker = false
     
-    private let currencies = ["JPY", "USD", "EUR", "GBP", "KRW", "CNY", "THB"]
+    private let currencyDB = CurrencyDatabase.shared
     
     var body: some View {
         NavigationView {
@@ -33,9 +34,31 @@ struct CreateGroupView: View {
                     TextField("グループ名", text: $groupName)
                         .textInputAutocapitalization(.words)
                     
-                    Picker("通貨", selection: $selectedCurrency) {
-                        ForEach(currencies, id: \.self) { currency in
-                            Text(currency).tag(currency)
+                    Button(action: { showingCurrencyPicker = true }) {
+                        HStack {
+                            Text("通貨")
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                            
+                            HStack(spacing: 8) {
+                                if let currency = currencyDB.getCurrency(code: selectedCurrency) {
+                                    Text(currency.symbol)
+                                        .font(.body)
+                                        .foregroundColor(.blue)
+                                    
+                                    Text(currency.code)
+                                        .font(.body)
+                                        .foregroundColor(.secondary)
+                                } else {
+                                    Text(selectedCurrency)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
                 }
@@ -136,6 +159,9 @@ struct CreateGroupView: View {
                 Button("OK") { }
             } message: {
                 Text("少なくとも1人のメンバーを追加してください")
+            }
+            .sheet(isPresented: $showingCurrencyPicker) {
+                CurrencyPickerView(selectedCurrency: $selectedCurrency)
             }
         }
     }

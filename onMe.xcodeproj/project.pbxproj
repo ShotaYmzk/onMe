@@ -43,6 +43,9 @@
 		5157B6DF2E8175B3007E633D /* CurrencyConversionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6DD2E8175B3007E633D /* CurrencyConversionView.swift */; };
 		5157B6E22E8175E6007E633D /* ExchangeRateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6E02E8175E6007E633D /* ExchangeRateService.swift */; };
 		5157B6E42E817604007E633D /* CurrencyConverterUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6E32E817604007E633D /* CurrencyConverterUseCase.swift */; };
+		5157B6E72E81AD8D007E633D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6E52E81AD8C007E633D /* OnboardingView.swift */; };
+		5157B6E92E81AD9F007E633D /* CurrencyPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6E82E81AD9F007E633D /* CurrencyPickerView.swift */; };
+		5157B6EB2E81ADBE007E633D /* CurrencyDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6EA2E81ADBE007E633D /* CurrencyDatabase.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,6 +105,9 @@
 		5157B6DD2E8175B3007E633D /* CurrencyConversionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrencyConversionView.swift; sourceTree = "<group>"; };
 		5157B6E02E8175E6007E633D /* ExchangeRateService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExchangeRateService.swift; sourceTree = "<group>"; };
 		5157B6E32E817604007E633D /* CurrencyConverterUseCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrencyConverterUseCase.swift; sourceTree = "<group>"; };
+		5157B6E52E81AD8C007E633D /* OnboardingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		5157B6E82E81AD9F007E633D /* CurrencyPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrencyPickerView.swift; sourceTree = "<group>"; };
+		5157B6EA2E81ADBE007E633D /* CurrencyDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrencyDatabase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -232,6 +238,7 @@
 		5157B6812E813B45007E633D /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5157B6E62E81AD8C007E633D /* Onboarding */,
 				5157B6DE2E8175B3007E633D /* Components */,
 				5157B6742E813B45007E633D /* Camera */,
 				5157B6782E813B45007E633D /* Expenses */,
@@ -377,6 +384,7 @@
 		5157B6DE2E8175B3007E633D /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				5157B6E82E81AD9F007E633D /* CurrencyPickerView.swift */,
 				5157B6DD2E8175B3007E633D /* CurrencyConversionView.swift */,
 			);
 			path = Components;
@@ -385,9 +393,18 @@
 		5157B6E12E8175E6007E633D /* Currency */ = {
 			isa = PBXGroup;
 			children = (
+				5157B6EA2E81ADBE007E633D /* CurrencyDatabase.swift */,
 				5157B6E02E8175E6007E633D /* ExchangeRateService.swift */,
 			);
 			path = Currency;
+			sourceTree = "<group>";
+		};
+		5157B6E62E81AD8C007E633D /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				5157B6E52E81AD8C007E633D /* OnboardingView.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -537,13 +554,16 @@
 				5157B6A82E813B45007E633D /* GroupListView.swift in Sources */,
 				5157B6A12E813B45007E633D /* GroupListViewModel.swift in Sources */,
 				5157B6A22E813B45007E633D /* SettlementViewModel.swift in Sources */,
+				5157B6E92E81AD9F007E633D /* CurrencyPickerView.swift in Sources */,
 				5157B6AF2E813B45007E633D /* SettlementCalculationUseCase.swift in Sources */,
+				5157B6E72E81AD8D007E633D /* OnboardingView.swift in Sources */,
 				5157B6AB2E813B45007E633D /* SettlementView.swift in Sources */,
 				5157B6B62E813B45007E633D /* ReceiptOCRService.swift in Sources */,
 				5157B6B02E813B45007E633D /* PersistenceController.swift in Sources */,
 				5157B6AD2E813B45007E633D /* GroupEntity.swift in Sources */,
 				5157B6B22E813B45007E633D /* AppState.swift in Sources */,
 				5157B6A52E813B45007E633D /* ExpenseFormView.swift in Sources */,
+				5157B6EB2E81ADBE007E633D /* CurrencyDatabase.swift in Sources */,
 				5157B6642E8136D2007E633D /* ContentView.swift in Sources */,
 				5157B6A32E813B45007E633D /* CameraView.swift in Sources */,
 				5157B6AA2E813B45007E633D /* SettlementDetailView.swift in Sources */,

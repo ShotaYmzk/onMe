@@ -22,58 +22,126 @@ struct GroupListView: View {
     
     @State private var showingCreateGroup = false
     @State private var selectedGroupForManagement: TravelGroup?
+    @State private var showingQuickCreateSheet = false
+    @State private var quickGroupName = ""
+    @State private var selectedGroupForSharing: TravelGroup?
     
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing: 0) {
+                // ヘッダー部分
+                VStack(spacing: 16) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("onMe")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                            
+                            Text("旅行の割り勘を簡単に")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        // クイック作成ボタン
+                        Button(action: { showingQuickCreateSheet = true }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title3)
+                                Text("作成")
+                                    .fontWeight(.semibold)
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(
+                                LinearGradient(
+                                    colors: [.blue, .blue.opacity(0.8)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(20)
+                            .shadow(color: .blue.opacity(0.3), radius: 4, x: 0, y: 2)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    
+                    // 統計情報（グループがある場合）
+                    if !groups.isEmpty {
+                        HStack(spacing: 20) {
+                            StatCardView(
+                                title: "グループ数",
+                                value: "\(groups.count)",
+                                icon: "person.3.fill",
+                                color: .blue
+                            )
+                            
+                            StatCardView(
+                                title: "総支出",
+                                value: formatTotalExpenses(),
+                                icon: "creditcard.fill",
+                                color: .green
+                            )
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                }
+                .padding(.bottom, 16)
+                .background(
+                    LinearGradient(
+                        colors: [Color(UIColor.systemBackground), Color(UIColor.secondarySystemBackground).opacity(0.3)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                
+                // メインコンテンツ
                 if groups.isEmpty {
                     EmptyGroupsView {
-                        showingCreateGroup = true
+                        showingQuickCreateSheet = true
                     }
                 } else {
-                    List {
-                        ForEach(groups, id: \.id) { group in
-                            Button(action: {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    appState.selectGroup(group)
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(groups, id: \.id) { group in
+                                Button(action: {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                        appState.selectGroup(group)
+                                    }
+                                }) {
+                                    ModernGroupCardView(group: group, onManageMembers: {
+                                        selectedGroupForManagement = group
+                                    }, onShare: {
+                                        selectedGroupForSharing = group
+                                    })
                                 }
-                            }) {
-                                GroupRowView(group: group) {
-                                    selectedGroupForManagement = group
-                                }
+                                .buttonStyle(ScaleButtonStyle())
                             }
-                            .buttonStyle(PlainButtonStyle())
                         }
-                        .onDelete(perform: deleteGroups)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
                     }
                     .refreshable {
-                        // プルトゥリフレッシュ処理
-                        try? await Task.sleep(nanoseconds: 500_000_000)
+                        await refreshData()
                     }
                 }
             }
-            .navigationTitle("グループ")
-            .toolbar(content: {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingCreateGroup = true }) {
-                        Image(systemName: "plus")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                    }
-                }
-                
-                if !groups.isEmpty {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        EditButton()
-                            .fontWeight(.medium)
-                    }
-                }
-            })
+            .navigationBarHidden(true)
             .sheet(isPresented: $showingCreateGroup) {
                 CreateGroupView()
             }
+            .sheet(isPresented: $showingQuickCreateSheet) {
+                QuickCreateGroupView()
+            }
             .sheet(item: $selectedGroupForManagement) { group in
                 GroupMemberManagementView(group: group)
+            }
+            .sheet(item: $selectedGroupForSharing) { group in
+                GroupSharingView(group: group)
             }
         }
         .onAppear {
@@ -90,10 +158,30 @@ struct GroupListView: View {
             do {
                 try viewContext.save()
             } catch {
-                // エラーハンドリング
                 print("グループの削除に失敗しました: \(error)")
             }
         }
+    }
+    
+    private func formatTotalExpenses() -> String {
+        let total = groups.reduce(0.0) { sum, group in
+            let groupTotal = group.expenses?.allObjects
+                .compactMap { $0 as? Expense }
+                .filter { $0.isActive }
+                .reduce(0.0) { $0 + ($1.amount?.doubleValue ?? 0) } ?? 0
+            return sum + groupTotal
+        }
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
+        return "¥\(formatter.string(from: NSNumber(value: total)) ?? "0")"
+    }
+    
+    @MainActor
+    private func refreshData() async {
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        appState.loadExchangeRates()
     }
 }
 
@@ -226,60 +314,463 @@ struct GroupRowView: View {
     }
 }
 
+// MARK: - 新しいコンポーネント
+
+struct StatCardView: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundColor(color)
+                
+                Spacer()
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Text(title)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(16)
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+}
+
+struct ModernGroupCardView: View {
+    let group: TravelGroup
+    let onManageMembers: () -> Void
+    let onShare: () -> Void
+    @Environment(\.colorScheme) var colorScheme
+    
+    private var totalExpenses: Decimal {
+        group.expenses?.allObjects
+            .compactMap { $0 as? Expense }
+            .filter { $0.isActive }
+            .reduce(0) { $0 + ($1.amount?.decimalValue ?? 0) } ?? 0
+    }
+    
+    private var memberCount: Int {
+        group.members?.allObjects
+            .compactMap { $0 as? GroupMember }
+            .filter { $0.isActive }
+            .count ?? 0
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // メインコンテンツ
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(group.name ?? "")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                            .lineLimit(2)
+                        
+                        HStack(spacing: 12) {
+                            Label("\(memberCount)人", systemImage: "person.2.fill")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            if let createdDate = group.createdDate {
+                                Label(createdDate.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text("\(totalExpenses as NSDecimalNumber, formatter: currencyFormatter)")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Text(group.currency ?? "JPY")
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 2)
+                            .background(Color.blue)
+                            .cornerRadius(6)
+                    }
+                }
+                
+                // 予算プログレス（ある場合）
+                if let budget = group.budget, budget.doubleValue > 0 {
+                    VStack(spacing: 6) {
+                        HStack {
+                            Text("予算進捗")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Spacer()
+                            
+                            let ratio = NSDecimalNumber(decimal: totalExpenses).doubleValue / budget.doubleValue
+                            Text("\(Int(ratio * 100))%")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(budgetColor)
+                        }
+                        
+                        ProgressView(value: min(NSDecimalNumber(decimal: totalExpenses).doubleValue / budget.doubleValue, 1.0))
+                            .progressViewStyle(LinearProgressViewStyle(tint: budgetColor))
+                            .frame(height: 4)
+                            .cornerRadius(2)
+                    }
+                }
+            }
+            .padding(20)
+            
+            // アクションエリア
+            HStack {
+                Button(action: onManageMembers) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "person.badge.plus")
+                            .font(.caption)
+                        Text("メンバー")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.blue)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(8)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Button(action: onShare) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.caption)
+                        Text("共有")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.green)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.green.opacity(0.1))
+                    .cornerRadius(8)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 16)
+        }
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.3 : 0.1), radius: 8, x: 0, y: 2)
+    }
+    
+    private var budgetColor: Color {
+        guard let budget = group.budget, budget.doubleValue > 0 else { return .blue }
+        let ratio = NSDecimalNumber(decimal: totalExpenses).doubleValue / budget.doubleValue
+        
+        if ratio >= 1.0 {
+            return .red
+        } else if ratio >= 0.8 {
+            return .orange
+        } else {
+            return .green
+        }
+    }
+    
+    private var currencyFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 0
+        return formatter
+    }
+}
+
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+    }
+}
+
+struct QuickCreateGroupView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.managedObjectContext) private var viewContext
+    @EnvironmentObject private var appState: AppState
+    
+    @State private var groupName = ""
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 24) {
+                VStack(spacing: 16) {
+                    Circle()
+                        .fill(LinearGradient(colors: [.blue, .blue.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: 80, height: 80)
+                        .overlay(
+                            Image(systemName: "person.3.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(.white)
+                        )
+                    
+                    VStack(spacing: 8) {
+                        Text("新しいグループを作成")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Text("グループ名を入力してすぐに始めましょう")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                
+                VStack(spacing: 16) {
+                    TextField("例: 沖縄旅行、忘年会", text: $groupName)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.body)
+                        .textInputAutocapitalization(.words)
+                    
+                    Button(action: createQuickGroup) {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title3)
+                            Text("グループを作成")
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(
+                            LinearGradient(
+                                colors: [.blue, .blue.opacity(0.8)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(12)
+                        .shadow(color: .blue.opacity(0.3), radius: 4, x: 0, y: 2)
+                    }
+                    .disabled(groupName.trimmingCharacters(in: .whitespaces).isEmpty)
+                    
+                    Button("詳細設定で作成") {
+                        dismiss()
+                        // 詳細作成画面を開く処理を追加
+                    }
+                    .foregroundColor(.blue)
+                    .font(.body)
+                }
+                
+                Spacer()
+            }
+            .padding(.horizontal, 32)
+            .padding(.top, 40)
+            .navigationTitle("クイック作成")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("キャンセル") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert("エラー", isPresented: $showingAlert) {
+                Button("OK") { }
+            } message: {
+                Text(alertMessage)
+            }
+        }
+    }
+    
+    private func createQuickGroup() {
+        let trimmedName = groupName.trimmingCharacters(in: .whitespaces)
+        guard !trimmedName.isEmpty else { return }
+        
+        let newGroup = TravelGroup(context: viewContext)
+        newGroup.id = UUID()
+        newGroup.name = trimmedName
+        newGroup.currency = appState.preferredCurrency
+        newGroup.createdDate = Date()
+        newGroup.isActive = true
+        
+        do {
+            try viewContext.save()
+            appState.selectGroup(newGroup)
+            dismiss()
+        } catch {
+            alertMessage = "グループの作成に失敗しました: \(error.localizedDescription)"
+            showingAlert = true
+        }
+    }
+}
+
 struct EmptyGroupsView: View {
     let onCreateGroup: () -> Void
     
     var body: some View {
-        VStack(spacing: 24) {
-            VStack(spacing: 16) {
-                Circle()
-                    .fill(Color.blue.opacity(0.1))
-                    .frame(width: 120, height: 120)
-                    .overlay(
-                        Image(systemName: "person.3.fill")
-                            .font(.system(size: 50))
-                            .foregroundColor(.blue)
-                    )
-                
-                VStack(spacing: 8) {
-                    Text("グループがありません")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+        VStack(spacing: 32) {
+            VStack(spacing: 24) {
+                // アニメーション付きアイコン
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [.blue.opacity(0.1), .blue.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 140, height: 140)
                     
-                    Text("新しいグループを作成して\n旅行の支出管理を始めましょう")
-                        .font(.body)
-                        .foregroundColor(.secondary)
+                    VStack(spacing: 8) {
+                        Image(systemName: "person.3.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(.blue)
+                        
+                        Image(systemName: "plus.circle")
+                            .font(.system(size: 20))
+                            .foregroundColor(.blue.opacity(0.7))
+                    }
+                }
+                .scaleEffect(1.0)
+                .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: true)
+                
+                VStack(spacing: 12) {
+                    Text("最初のグループを作成しましょう")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
                         .multilineTextAlignment(.center)
-                        .lineSpacing(2)
+                    
+                    VStack(spacing: 8) {
+                        Text("旅行やイベントでの支出を")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                        Text("簡単に管理・清算できます")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+                    .multilineTextAlignment(.center)
                 }
             }
             
-            Button(action: onCreateGroup) {
-                HStack(spacing: 8) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title3)
-                    Text("グループを作成")
-                        .fontWeight(.semibold)
-                }
-                .foregroundColor(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
-                        startPoint: .leading,
-                        endPoint: .trailing
+            VStack(spacing: 16) {
+                Button(action: onCreateGroup) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title3)
+                        Text("グループを作成")
+                            .fontWeight(.semibold)
+                            .font(.body)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [.blue, .blue.opacity(0.8)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
                     )
-                )
-                .cornerRadius(12)
-                .shadow(color: Color.blue.opacity(0.3), radius: 4, x: 0, y: 2)
+                    .cornerRadius(16)
+                    .shadow(color: .blue.opacity(0.3), radius: 8, x: 0, y: 4)
+                }
+                
+                VStack(spacing: 12) {
+                    HStack(spacing: 16) {
+                        FeatureItemView(
+                            icon: "camera.fill",
+                            title: "レシート読取",
+                            description: "撮影で自動入力"
+                        )
+                        
+                        FeatureItemView(
+                            icon: "yensign.circle.fill",
+                            title: "多通貨対応",
+                            description: "海外旅行も安心"
+                        )
+                    }
+                    
+                    HStack(spacing: 16) {
+                        FeatureItemView(
+                            icon: "arrow.left.arrow.right.circle.fill",
+                            title: "自動清算",
+                            description: "最適ルート提案"
+                        )
+                        
+                        FeatureItemView(
+                            icon: "lock.shield.fill",
+                            title: "安全・安心",
+                            description: "データは端末内に"
+                        )
+                    }
+                }
             }
-            .scaleEffect(1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: true)
         }
         .padding(.horizontal, 32)
         .padding(.vertical, 40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct FeatureItemView: View {
+    let icon: String
+    let title: String
+    let description: String
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(.blue)
+            
+            VStack(spacing: 2) {
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                
+                Text(description)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 8)
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
     }
 }
 
@@ -474,4 +965,5 @@ struct MemberRowView: View {
         .environmentObject(AppState())
         .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
+
 
