@@ -15,12 +15,15 @@ struct SettlementView: View {
     
     @State private var showingSettlementDetail = false
     @State private var selectedSuggestion: SettlementSuggestion?
+    @State private var showingExpenseForm = false
     
     var body: some View {
         NavigationView {
             VStack {
                 if appState.selectedGroup == nil {
-                    NoGroupSelectedView()
+                    NoGroupSelectedView {
+                        showingExpenseForm = true
+                    }
                 } else {
                     ScrollView {
                         VStack(spacing: 20) {
@@ -45,6 +48,9 @@ struct SettlementView: View {
             }
             .sheet(item: $selectedSuggestion) { suggestion in
                 SettlementDetailView(suggestion: suggestion, group: appState.selectedGroup!)
+            }
+            .sheet(isPresented: $showingExpenseForm) {
+                ExpenseFormView(preselectedGroup: appState.selectedGroup)
             }
         }
     }

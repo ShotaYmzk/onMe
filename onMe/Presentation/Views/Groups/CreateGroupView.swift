@@ -21,6 +21,8 @@ struct CreateGroupView: View {
     @State private var hasDateRange = false
     @State private var showingAlert = false
     @State private var alertMessage = ""
+    @State private var members: [String] = [""]
+    @State private var showingMemberAlert = false
     
     private let currencies = ["JPY", "USD", "EUR", "GBP", "KRW", "CNY", "THB"]
     
@@ -78,6 +80,39 @@ struct CreateGroupView: View {
                         }
                     }
                 }
+                
+                Section(header: Text("メンバー"), footer: Text("グループに参加するメンバーの名前を入力してください")) {
+                    ForEach(members.indices, id: \.self) { index in
+                        HStack {
+                            TextField("メンバー \(index + 1)", text: $members[index])
+                                .textInputAutocapitalization(.words)
+                            
+                            if members.count > 1 {
+                                Button(action: {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        members.remove(at: index)
+                                    }
+                                }) {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        }
+                    }
+                    
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            members.append("")
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundColor(.blue)
+                            Text("メンバーを追加")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                }
             }
             .navigationTitle("新しいグループ")
             .navigationBarTitleDisplayMode(.inline)
@@ -92,7 +127,7 @@ struct CreateGroupView: View {
                     Button("作成") {
                         createGroup()
                     }
-                    .disabled(groupName.isEmpty || (hasDateRange && startDate >= endDate))
+                    .disabled(!isValidForm)
                     .fontWeight(.semibold)
                 }
             }
@@ -101,7 +136,20 @@ struct CreateGroupView: View {
             } message: {
                 Text(alertMessage)
             }
+            .alert("メンバーが必要です", isPresented: $showingMemberAlert) {
+                Button("OK") { }
+            } message: {
+                Text("少なくとも1人のメンバーを追加してください")
+            }
         }
+    }
+    
+    private var isValidForm: Bool {
+        let hasValidName = !groupName.isEmpty
+        let hasValidDates = !hasDateRange || startDate < endDate
+        let hasValidMembers = !members.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.isEmpty
+        
+        return hasValidName && hasValidDates && hasValidMembers
     }
     
     private func createGroup() {
@@ -125,6 +173,23 @@ struct CreateGroupView: View {
         newGroup.endDate = end
         newGroup.createdDate = Date()
         newGroup.isActive = true
+        
+        // メンバーを追加
+        let validMembers = members.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+        
+        if validMembers.isEmpty {
+            showingMemberAlert = true
+            return
+        }
+        
+        for memberName in validMembers {
+            let member = GroupMember(context: viewContext)
+            member.id = UUID()
+            member.name = memberName.trimmingCharacters(in: .whitespaces)
+            member.createdDate = Date()
+            member.isActive = true
+            member.group = newGroup
+        }
         
         do {
             try viewContext.save()

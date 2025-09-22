@@ -21,6 +21,7 @@ struct GroupListView: View {
     private var groups: FetchedResults<TravelGroup>
     
     @State private var showingCreateGroup = false
+    @State private var selectedGroupForManagement: TravelGroup?
     
     var body: some View {
         NavigationView {
@@ -37,7 +38,9 @@ struct GroupListView: View {
                                     appState.selectGroup(group)
                                 }
                             }) {
-                                GroupRowView(group: group)
+                                GroupRowView(group: group) {
+                                    selectedGroupForManagement = group
+                                }
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
@@ -69,6 +72,9 @@ struct GroupListView: View {
             .sheet(isPresented: $showingCreateGroup) {
                 CreateGroupView()
             }
+            .sheet(item: $selectedGroupForManagement) { group in
+                GroupMemberManagementView(group: group)
+            }
         }
         .onAppear {
             viewModel.setContext(viewContext)
@@ -93,6 +99,7 @@ struct GroupListView: View {
 
 struct GroupRowView: View {
     let group: TravelGroup
+    let onManageMembers: () -> Void
     @Environment(\.colorScheme) var colorScheme
     
     private var totalExpenses: Decimal {
@@ -119,14 +126,20 @@ struct GroupRowView: View {
                         .foregroundColor(.primary)
                     
                     HStack(spacing: 12) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "person.2.fill")
-                                .foregroundColor(.blue)
-                                .font(.caption)
-                            Text("\(memberCount)人")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                        Button(action: onManageMembers) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "person.2.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.caption)
+                                Text("\(memberCount)人")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.right")
+                                    .font(.caption2)
+                                    .foregroundColor(.blue)
+                            }
                         }
+                        .buttonStyle(PlainButtonStyle())
                         
                         if let createdDate = group.createdDate {
                             HStack(spacing: 4) {
