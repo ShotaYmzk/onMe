@@ -41,10 +41,14 @@ struct ExpenseListView: View {
                 } else {
                     List {
                         ForEach(filteredExpenses, id: \.id) { expense in
-                            ExpenseRowView(expense: expense)
-                                .onTapGesture {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
                                     selectedExpense = expense
                                 }
+                            }) {
+                                ExpenseRowView(expense: expense)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
                         .onDelete(perform: deleteExpenses)
                     }
@@ -59,11 +63,16 @@ struct ExpenseListView: View {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: { showingExpenseForm = true }) {
                             Image(systemName: "plus")
+                                .font(.title3)
+                                .fontWeight(.semibold)
                         }
                     }
                     
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        EditButton()
+                    if !filteredExpenses.isEmpty {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            EditButton()
+                                .fontWeight(.medium)
+                        }
                     }
                 }
             }
@@ -99,7 +108,7 @@ struct ExpenseRowView: View {
     private var totalAmount: Decimal {
         expense.payments?.allObjects
             .compactMap { $0 as? ExpensePayment }
-            .reduce(0) { $0 + $1.amount } ?? 0
+            .reduce(0) { $0 + ($1.amount?.decimalValue ?? 0) } ?? 0
     }
     
     private var categoryIcon: String {
@@ -111,42 +120,58 @@ struct ExpenseRowView: View {
     }
     
     var body: some View {
-        HStack {
-            Image(systemName: categoryIcon)
-                .foregroundColor(.blue)
-                .frame(width: 24, height: 24)
+        HStack(spacing: 12) {
+            Circle()
+                .fill(Color.blue.opacity(0.1))
+                .frame(width: 44, height: 44)
+                .overlay(
+                    Image(systemName: categoryIcon)
+                        .font(.title3)
+                        .foregroundColor(.blue)
+                )
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(expense.desc ?? "支出")
                     .font(.headline)
+                    .fontWeight(.semibold)
                     .lineLimit(1)
+                    .foregroundColor(.primary)
                 
-                HStack {
+                HStack(spacing: 12) {
                     Text(categoryName)
                         .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.blue.opacity(0.8))
+                        .cornerRadius(8)
                     
                     Text(expense.createdDate?.formatted(date: .abbreviated, time: .omitted) ?? "")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                    
+                    Spacer()
                 }
             }
             
-            Spacer()
-            
-            VStack(alignment: .trailing) {
+            VStack(alignment: .trailing, spacing: 4) {
                 Text("\(totalAmount as NSDecimalNumber, formatter: currencyFormatter)")
-                    .font(.headline)
-                    .fontWeight(.medium)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
                 
                 Text(expense.currency ?? "JPY")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(Color.secondary.opacity(0.1))
+                    .cornerRadius(4)
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(expense.desc ?? "支出"), \(categoryName), \(totalAmount as NSDecimalNumber, formatter: currencyFormatter) \(expense.currency ?? "JPY")")
     }
@@ -185,34 +210,54 @@ struct EmptyExpensesView: View {
     let onCreateExpense: () -> Void
     
     var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "creditcard.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.secondary)
-            
-            Text("支出がありません")
-                .font(.title2)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
-            
-            Text("新しい支出を登録して\n旅行の記録を始めましょう")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+        VStack(spacing: 24) {
+            VStack(spacing: 16) {
+                Circle()
+                    .fill(Color.green.opacity(0.1))
+                    .frame(width: 120, height: 120)
+                    .overlay(
+                        Image(systemName: "creditcard.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(.green)
+                    )
+                
+                VStack(spacing: 8) {
+                    Text("支出がありません")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    
+                    Text("新しい支出を登録して\n旅行の記録を始めましょう")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                }
+            }
             
             Button(action: onCreateExpense) {
-                HStack {
-                    Image(systemName: "plus")
+                HStack(spacing: 8) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
                     Text("支出を登録")
+                        .fontWeight(.semibold)
                 }
-                .font(.headline)
                 .foregroundColor(.white)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(10)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.green, Color.green.opacity(0.8)]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(12)
+                .shadow(color: Color.green.opacity(0.3), radius: 4, x: 0, y: 2)
             }
         }
-        .padding()
+        .padding(.horizontal, 32)
+        .padding(.vertical, 40)
     }
 }
 

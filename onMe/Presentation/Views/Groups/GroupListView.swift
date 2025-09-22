@@ -32,10 +32,14 @@ struct GroupListView: View {
                 } else {
                     List {
                         ForEach(groups, id: \.id) { group in
-                            GroupRowView(group: group)
-                                .onTapGesture {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
                                     appState.selectGroup(group)
                                 }
+                            }) {
+                                GroupRowView(group: group)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
                         .onDelete(perform: deleteGroups)
                     }
@@ -50,11 +54,16 @@ struct GroupListView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingCreateGroup = true }) {
                         Image(systemName: "plus")
+                            .font(.title3)
+                            .fontWeight(.semibold)
                     }
                 }
                 
-                ToolbarItem(placement: .navigationBarLeading) {
-                    EditButton()
+                if !groups.isEmpty {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        EditButton()
+                            .fontWeight(.medium)
+                    }
                 }
             }
             .sheet(isPresented: $showingCreateGroup) {
@@ -90,7 +99,7 @@ struct GroupRowView: View {
         group.expenses?.allObjects
             .compactMap { $0 as? Expense }
             .filter { $0.isActive }
-            .reduce(0) { $0 + $1.amount } ?? 0
+            .reduce(0) { $0 + ($1.amount?.decimalValue ?? 0) } ?? 0
     }
     
     private var memberCount: Int {
@@ -101,51 +110,90 @@ struct GroupRowView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(group.name ?? "")
                         .font(.headline)
+                        .fontWeight(.semibold)
                         .foregroundColor(.primary)
                     
-                    HStack {
-                        Image(systemName: "person.2.fill")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
-                        Text("\(memberCount)人")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    HStack(spacing: 12) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "person.2.fill")
+                                .foregroundColor(.blue)
+                                .font(.caption)
+                            Text("\(memberCount)人")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        if let createdDate = group.createdDate {
+                            HStack(spacing: 4) {
+                                Image(systemName: "calendar")
+                                    .foregroundColor(.blue)
+                                    .font(.caption)
+                                Text(createdDate.formatted(date: .abbreviated, time: .omitted))
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
                         
                         Spacer()
-                        
-                        Text("\(totalExpenses as NSDecimalNumber, formatter: currencyFormatter) \(group.currency ?? "JPY")")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
                     }
                 }
                 
                 Spacer()
                 
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.secondary)
-                    .font(.caption)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("\(totalExpenses as NSDecimalNumber, formatter: currencyFormatter)")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Text(group.currency ?? "JPY")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.secondary.opacity(0.1))
+                        .cornerRadius(4)
+                }
             }
             
             if let budget = group.budget, budget.doubleValue > 0 {
-                ProgressView(value: min(totalExpenses.doubleValue / budget.doubleValue, 1.0))
-                    .progressViewStyle(LinearProgressViewStyle(tint: budgetColor))
-                    .scaleEffect(y: 0.5)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("予算進捗")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        
+                        Spacer()
+                        
+                        let ratio = NSDecimalNumber(decimal: totalExpenses).doubleValue / budget.doubleValue
+                        Text("\(Int(ratio * 100))%")
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .foregroundColor(budgetColor)
+                    }
+                    
+                    ProgressView(value: min(NSDecimalNumber(decimal: totalExpenses).doubleValue / budget.doubleValue, 1.0))
+                        .progressViewStyle(LinearProgressViewStyle(tint: budgetColor))
+                        .frame(height: 6)
+                        .cornerRadius(3)
+                }
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(group.name ?? ""), \(memberCount)人, 支出合計 \(totalExpenses as NSDecimalNumber, formatter: currencyFormatter) \(group.currency ?? "JPY")")
     }
     
     private var budgetColor: Color {
         guard let budget = group.budget, budget.doubleValue > 0 else { return .blue }
-        let ratio = totalExpenses.doubleValue / budget.doubleValue
+        let ratio = NSDecimalNumber(decimal: totalExpenses).doubleValue / budget.doubleValue
         
         if ratio >= 1.0 {
             return .red
@@ -169,34 +217,56 @@ struct EmptyGroupsView: View {
     let onCreateGroup: () -> Void
     
     var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "person.3.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.secondary)
-            
-            Text("グループがありません")
-                .font(.title2)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
-            
-            Text("新しいグループを作成して\n旅行の支出管理を始めましょう")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+        VStack(spacing: 24) {
+            VStack(spacing: 16) {
+                Circle()
+                    .fill(Color.blue.opacity(0.1))
+                    .frame(width: 120, height: 120)
+                    .overlay(
+                        Image(systemName: "person.3.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(.blue)
+                    )
+                
+                VStack(spacing: 8) {
+                    Text("グループがありません")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    
+                    Text("新しいグループを作成して\n旅行の支出管理を始めましょう")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                }
+            }
             
             Button(action: onCreateGroup) {
-                HStack {
-                    Image(systemName: "plus")
+                HStack(spacing: 8) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
                     Text("グループを作成")
+                        .fontWeight(.semibold)
                 }
-                .font(.headline)
                 .foregroundColor(.white)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(10)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(12)
+                .shadow(color: Color.blue.opacity(0.3), radius: 4, x: 0, y: 2)
             }
+            .scaleEffect(1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: true)
         }
-        .padding()
+        .padding(.horizontal, 32)
+        .padding(.vertical, 40)
     }
 }
 
@@ -205,3 +275,4 @@ struct EmptyGroupsView: View {
         .environmentObject(AppState())
         .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
+

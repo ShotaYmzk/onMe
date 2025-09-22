@@ -82,10 +82,14 @@ struct SettlementView: View {
                 .cornerRadius(12)
             } else {
                 ForEach(viewModel.settlementSuggestions) { suggestion in
-                    SettlementSuggestionRow(suggestion: suggestion, group: appState.selectedGroup!)
-                        .onTapGesture {
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
                             selectedSuggestion = suggestion
                         }
+                    }) {
+                        SettlementSuggestionRow(suggestion: suggestion, group: appState.selectedGroup!)
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
         }
@@ -270,7 +274,7 @@ struct SettlementHistoryRow: View {
             Spacer()
             
             VStack(alignment: .trailing) {
-                Text("\(settlement.amount as NSDecimalNumber, formatter: currencyFormatter)")
+                Text("\(settlement.amount ?? NSDecimalNumber.zero, formatter: currencyFormatter)")
                     .font(.subheadline)
                     .fontWeight(.medium)
                 

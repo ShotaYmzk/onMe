@@ -38,22 +38,44 @@ struct CreateGroupView: View {
                     }
                 }
                 
-                Section(header: Text("予算設定")) {
+                Section(header: Text("予算設定"), footer: hasBudget ? Text("グループの予算を設定すると、支出状況を追跡できます") : nil) {
                     Toggle("予算を設定", isOn: $hasBudget)
+                        .toggleStyle(SwitchToggleStyle(tint: .blue))
                     
                     if hasBudget {
-                        TextField("予算", text: $budgetString)
-                            .keyboardType(.decimalPad)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        HStack {
+                            TextField("予算金額を入力", text: $budgetString)
+                                .keyboardType(.decimalPad)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            
+                            Text(selectedCurrency)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .frame(width: 40, alignment: .leading)
+                        }
                     }
                 }
                 
-                Section(header: Text("期間設定")) {
+                Section(header: Text("期間設定"), footer: hasDateRange ? Text("旅行やイベントの期間を設定できます") : nil) {
                     Toggle("期間を設定", isOn: $hasDateRange)
+                        .toggleStyle(SwitchToggleStyle(tint: .blue))
                     
                     if hasDateRange {
                         DatePicker("開始日", selection: $startDate, displayedComponents: .date)
+                            .datePickerStyle(CompactDatePickerStyle())
+                        
                         DatePicker("終了日", selection: $endDate, displayedComponents: .date)
+                            .datePickerStyle(CompactDatePickerStyle())
+                        
+                        if startDate >= endDate {
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.orange)
+                                Text("終了日は開始日より後に設定してください")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
+                        }
                     }
                 }
             }
@@ -70,7 +92,8 @@ struct CreateGroupView: View {
                     Button("作成") {
                         createGroup()
                     }
-                    .disabled(groupName.isEmpty)
+                    .disabled(groupName.isEmpty || (hasDateRange && startDate >= endDate))
+                    .fontWeight(.semibold)
                 }
             }
             .alert("エラー", isPresented: $showingAlert) {

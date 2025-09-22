@@ -42,6 +42,15 @@ struct ContentView: View {
         }
         .accentColor(.blue)
         .preferredColorScheme(appState.isDarkModeEnabled ? .dark : .light)
+        .onAppear {
+            // タブバーの外観をカスタマイズ
+            let tabBarAppearance = UITabBarAppearance()
+            tabBarAppearance.configureWithOpaqueBackground()
+            tabBarAppearance.backgroundColor = UIColor.systemBackground
+            
+            UITabBar.appearance().standardAppearance = tabBarAppearance
+            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        }
     }
 }
 
