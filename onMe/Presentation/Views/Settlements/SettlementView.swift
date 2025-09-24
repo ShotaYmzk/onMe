@@ -41,7 +41,7 @@ struct SettlementView: View {
                     viewModel.loadSettlements(for: group)
                 }
             }
-            .onChange(of: appState.selectedGroup) { newGroup in
+            .onChange(of: appState.selectedGroup) { _, newGroup in
                 if let group = newGroup {
                     viewModel.loadSettlements(for: group)
                 }

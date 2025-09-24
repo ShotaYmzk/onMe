@@ -59,56 +59,65 @@ struct LocationPickerView: View {
                         .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    HStack(spacing: 12) {
-                        Button(action: getCurrentLocation) {
-                            HStack(spacing: 6) {
-                                if case .loading = currentLocationStatus {
-                                    ProgressView()
-                                        .scaleEffect(0.8)
-                                } else {
-                                    Image(systemName: "location.circle.fill")
-                                        .font(.title3)
+                    VStack(spacing: 8) {
+                        HStack(spacing: 12) {
+                            Button(action: getCurrentLocation) {
+                                HStack(spacing: 6) {
+                                    if case .loading = currentLocationStatus {
+                                        ProgressView()
+                                            .scaleEffect(0.8)
+                                    } else {
+                                        Image(systemName: "location.circle.fill")
+                                            .font(.title3)
+                                    }
+                                    Text("現在地")
+                                        .fontWeight(.medium)
                                 }
-                                Text("現在地")
-                                    .fontWeight(.medium)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.blue)
+                                .cornerRadius(8)
                             }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.blue)
-                            .cornerRadius(8)
-                        }
-                        .disabled(case .loading = currentLocationStatus)
-                        
-                        Button(action: { showingLocationPicker = true }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "magnifyingglass")
-                                    .font(.title3)
-                                Text("場所を検索")
-                                    .fontWeight(.medium)
+                            .disabled({
+                                if case .loading = currentLocationStatus {
+                                    return true
+                                }
+                                return false
+                            }())
+                            
+                            Button(action: { showingLocationPicker = true }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "magnifyingglass")
+                                        .font(.title3)
+                                    Text("場所を検索")
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.blue)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(8)
                             }
-                            .foregroundColor(.blue)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.blue.opacity(0.1))
-                            .cornerRadius(8)
-                        }
-                        
-                        Button(action: { showingCustomLocationAlert = true }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "pencil")
-                                    .font(.title3)
-                                Text("手入力")
-                                    .fontWeight(.medium)
-                            }
-                            .foregroundColor(.green)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.green.opacity(0.1))
-                            .cornerRadius(8)
                         }
                         
-                        Spacer()
+                        HStack {
+                            Button(action: { showingCustomLocationAlert = true }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "pencil")
+                                        .font(.title3)
+                                    Text("手入力")
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.green)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.green.opacity(0.1))
+                                .cornerRadius(8)
+                            }
+                            
+                            Spacer()
+                        }
                     }
                     
                     // ステータス表示
@@ -290,7 +299,7 @@ struct LocationSearchView: View {
     var body: some View {
         NavigationView {
             VStack {
-                SearchBar(text: $searchText, onSearchButtonClicked: performSearch)
+                LocationSearchBar(text: $searchText, onSearchButtonClicked: performSearch)
                     .padding(.horizontal)
                 
                 if isSearching {
@@ -432,7 +441,7 @@ struct LocationResultRow: View {
     }
 }
 
-struct SearchBar: View {
+struct LocationSearchBar: View {
     @Binding var text: String
     let onSearchButtonClicked: () -> Void
     

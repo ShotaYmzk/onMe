@@ -52,7 +52,7 @@ struct SettingsView: View {
                     }
                     .padding(.top, 20)
                     
-                    VStack(spacing: 16) {
+                    VStack(spacing: 24) {
                         modernGeneralSection
                         modernCurrencySection
                         modernAppearanceSection
@@ -596,12 +596,18 @@ struct SettingsSectionView<Content: View>: View {
                     .foregroundColor(.primary)
             }
             .padding(.horizontal, 16)
+            .padding(.bottom, 4)
             
             VStack(spacing: 0) {
                 content
             }
-            .background(Color(UIColor.secondarySystemBackground))
+            .background(Color(UIColor.systemBackground))
             .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color(UIColor.separator).opacity(0.3), lineWidth: 0.5)
+            )
+            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
         }
     }
 }
@@ -651,7 +657,19 @@ struct SettingsRowView<Trailing: View>: View {
             .padding(.vertical, 12)
             .contentShape(Rectangle())
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(SettingsButtonStyle())
+    }
+}
+
+struct SettingsButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                configuration.isPressed ? 
+                Color(UIColor.systemGray5) : 
+                Color.clear
+            )
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
@@ -679,8 +697,13 @@ struct ExchangeRatesView: View {
                         }
                     }
                 }
-                .background(Color(UIColor.secondarySystemBackground))
+                .background(Color(UIColor.systemBackground))
                 .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(UIColor.separator).opacity(0.3), lineWidth: 0.5)
+                )
+                .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
             }

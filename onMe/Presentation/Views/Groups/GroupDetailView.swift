@@ -36,7 +36,6 @@ struct GroupDetailView: View {
     private var settlements: [Settlement] {
         group.settlements?.allObjects
             .compactMap { $0 as? Settlement }
-            .filter { $0.isActive }
             .sorted { $0.createdDate ?? Date() > $1.createdDate ?? Date() } ?? []
     }
     
@@ -129,7 +128,7 @@ struct GroupDetailView: View {
                         }
                         
                         Button(action: { showingSettlement = true }) {
-                            Label("清算計算", systemImage: "calculator")
+                            Label("清算計算", systemImage: "equal.circle")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
@@ -183,7 +182,7 @@ struct GroupHeaderView: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(totalExpenses as NSDecimalNumber, formatter: currencyFormatter)")
+                    Text(currencyFormatter.string(from: NSDecimalNumber(decimal: totalExpenses)) ?? "0")
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
@@ -210,7 +209,7 @@ struct GroupHeaderView: View {
                         Spacer()
                         
                         let ratio = NSDecimalNumber(decimal: totalExpenses).doubleValue / budget.doubleValue
-                        Text("\(Int(ratio * 100))% (\(budget as NSDecimalNumber, formatter: currencyFormatter))")
+                        Text("\(Int(ratio * 100))% (\(currencyFormatter.string(from: budget) ?? "0"))")
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundColor(budgetColor)
@@ -247,45 +246,62 @@ struct TabSelectorView: View {
     @Binding var selectedTab: GroupDetailView.DetailTab
     
     var body: some View {
-        HStack(spacing: 0) {
-            ForEach(GroupDetailView.DetailTab.allCases, id: \.self) { tab in
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        selectedTab = tab
-                    }
-                }) {
-                    VStack(spacing: 6) {
-                        Image(systemName: tab.icon)
-                            .font(.system(size: 16, weight: .medium))
-                        
-                        Text(tab.title)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                    .foregroundColor(selectedTab == tab ? .blue : .secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(
-                        Rectangle()
-                            .fill(selectedTab == tab ? Color.blue.opacity(0.1) : Color.clear)
-                    )
-                    .overlay(
-                        Rectangle()
-                            .frame(height: 2)
-                            .fill(selectedTab == tab ? Color.blue : Color.clear)
-                            .offset(y: 18)
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                ForEach(GroupDetailView.DetailTab.allCases, id: \.self) { tab in
+                    TabSelectorButton(
+                        tab: tab,
+                        selectedTab: selectedTab,
+                        onTap: {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                selectedTab = tab
+                            }
+                        }
                     )
                 }
-                .buttonStyle(PlainButtonStyle())
             }
+            
+            Rectangle()
+                .fill(Color(UIColor.separator))
+                .frame(height: 0.5)
         }
         .background(Color(UIColor.systemBackground))
-        .overlay(
-            Rectangle()
-                .frame(height: 0.5)
-                .fill(Color(UIColor.separator))
-                .offset(y: 18)
-        )
+        .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 1)
+    }
+}
+
+// MARK: - Tab Selector Button
+struct TabSelectorButton: View {
+    let tab: GroupDetailView.DetailTab
+    let selectedTab: GroupDetailView.DetailTab
+    let onTap: () -> Void
+    
+    private var isSelected: Bool {
+        selectedTab == tab
+    }
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 0) {
+                VStack(spacing: 4) {
+                    Image(systemName: tab.icon)
+                        .font(.system(size: 18, weight: .medium))
+                    
+                    Text(tab.title)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(isSelected ? .blue : .secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+                
+                Rectangle()
+                    .fill(isSelected ? Color.blue : Color.clear)
+                    .frame(height: 2)
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -384,7 +400,7 @@ struct StatsCardsView: View {
             
             StatCard(
                 title: "総支出額",
-                value: "\(totalExpenses as NSDecimalNumber, formatter: currencyFormatter) \(currency)",
+                value: "\(currencyFormatter.string(from: NSDecimalNumber(decimal: totalExpenses)) ?? "0") \(currency)",
                 icon: "yensign.circle.fill",
                 color: .orange,
                 isWide: true
@@ -529,11 +545,11 @@ struct MemberSummaryRow: View {
                     .foregroundColor(.primary)
                 
                 HStack(spacing: 8) {
-                    Text("支払: \(totalPaid as NSDecimalNumber, formatter: currencyFormatter)")
+                    Text("支払: \(currencyFormatter.string(from: NSDecimalNumber(decimal: totalPaid)) ?? "0")")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     
-                    Text("負担: \(totalOwed as NSDecimalNumber, formatter: currencyFormatter)")
+                    Text("負担: \(currencyFormatter.string(from: NSDecimalNumber(decimal: totalOwed)) ?? "0")")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
@@ -546,7 +562,7 @@ struct MemberSummaryRow: View {
                     .font(.caption2)
                     .foregroundColor(balance >= 0 ? .green : .red)
                 
-                Text("\(abs(balance) as NSDecimalNumber, formatter: currencyFormatter)")
+                Text(currencyFormatter.string(from: NSDecimalNumber(decimal: abs(balance))) ?? "0")
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundColor(balance >= 0 ? .green : .red)
@@ -652,7 +668,7 @@ struct ExpenseSummaryRow: View {
             
             Spacer()
             
-            Text("\(expense.amount?.decimalValue ?? 0 as NSDecimalNumber, formatter: currencyFormatter)")
+            Text(currencyFormatter.string(from: NSDecimalNumber(decimal: expense.amount?.decimalValue ?? 0)) ?? "0")
                 .font(.subheadline)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
@@ -765,7 +781,7 @@ struct ExpenseDetailRow: View {
                 
                 Spacer()
                 
-                Text("\(expense.amount?.decimalValue ?? 0 as NSDecimalNumber, formatter: currencyFormatter)")
+                Text(currencyFormatter.string(from: NSDecimalNumber(decimal: expense.amount?.decimalValue ?? 0)) ?? "0")
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
@@ -800,7 +816,7 @@ struct ExpenseDetailRow: View {
                     
                     ForEach(payments, id: \.id) { payment in
                         if let payer = payment.payer {
-                            Text("• \(payer.name ?? "") - \(payment.amount?.decimalValue ?? 0 as NSDecimalNumber, formatter: currencyFormatter)")
+                            Text("• \(payer.name ?? "") - \(currencyFormatter.string(from: NSDecimalNumber(decimal: payment.amount?.decimalValue ?? 0)) ?? "0")")
                                 .font(.caption2)
                                 .foregroundColor(.blue)
                         }
@@ -873,7 +889,7 @@ struct SettlementRow: View {
             Spacer()
             
             VStack(alignment: .trailing, spacing: 2) {
-                Text("\(settlement.amount?.decimalValue ?? 0 as NSDecimalNumber, formatter: currencyFormatter)")
+                Text(currencyFormatter.string(from: NSDecimalNumber(decimal: settlement.amount?.decimalValue ?? 0)) ?? "0")
                     .font(.headline)
                     .fontWeight(.bold)
                 
