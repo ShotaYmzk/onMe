@@ -46,13 +46,13 @@ struct GroupListView: View {
                             title: "グループ数",
                             value: "\(groups.count)",
                             icon: "person.3.fill",
-                            color: .blue
+                            color: Color.unifiedPrimary
                         ),
                         HeaderStatistics.StatItem(
                             title: "総支出",
                             value: formatTotalExpenses(),
                             icon: "creditcard.fill",
-                            color: .green
+                            color: Color.unifiedSecondary
                         )
                     ]) : nil
                 )

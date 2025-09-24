@@ -34,8 +34,8 @@ struct ExpenseListView: View {
             VStack(spacing: 0) {
                 // 統一ヘッダー
                 UnifiedHeaderView(
-                    title: appState.selectedGroup?.name ?? "支出",
-                    subtitle: appState.selectedGroup != nil ? "グループの支出を管理" : nil,
+                    title: "支出",
+                    subtitle: appState.selectedGroup != nil ? "グループの支出を管理" : "グループを選択して支出を登録",
                     primaryAction: { showingExpenseForm = true },
                     primaryActionTitle: "登録",
                     primaryActionIcon: "plus.circle.fill",
@@ -46,13 +46,13 @@ struct ExpenseListView: View {
                                 title: "支出件数",
                                 value: "\(filteredExpenses.count)件",
                                 icon: "creditcard.fill",
-                                color: .green
+                                color: Color.unifiedSecondary
                             ),
                             HeaderStatistics.StatItem(
                                 title: "合計金額",
                                 value: formatTotalExpenses(),
                                 icon: "yensign.circle.fill",
-                                color: .blue
+                                color: Color.unifiedPrimary
                             )
                         ]) : nil
                 )

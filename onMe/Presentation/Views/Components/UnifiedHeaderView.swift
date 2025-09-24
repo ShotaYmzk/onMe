@@ -39,7 +39,7 @@ struct UnifiedHeaderView: View {
         VStack(spacing: 0) {
             // メインヘッダー部分
             VStack(spacing: 16) {
-                HStack {
+                HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(title)
                             .font(.largeTitle)
@@ -73,18 +73,18 @@ struct UnifiedHeaderView: View {
                             .padding(.vertical, 8)
                             .background(
                                 LinearGradient(
-                                    colors: [.blue, .blue.opacity(0.8)],
+                                    colors: [Color(.systemBlue), Color(.systemBlue).opacity(0.8)],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
                             )
                             .cornerRadius(20)
-                            .shadow(color: .blue.opacity(0.3), radius: 4, x: 0, y: 2)
+                            .shadow(color: Color(.systemBlue).opacity(0.3), radius: 4, x: 0, y: 2)
                         }
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
+                .padding(.horizontal, UnifiedSpacing.lg)
+                .padding(.top, UnifiedSpacing.sm)
                 
                 // 統計情報（表示する場合）
                 if showStatistics, let stats = statisticsData {
@@ -98,15 +98,15 @@ struct UnifiedHeaderView: View {
                             )
                         }
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, UnifiedSpacing.lg)
                 }
             }
-            .padding(.bottom, 16)
+            .padding(.bottom, UnifiedSpacing.md)
             .background(
                 LinearGradient(
                     colors: [
-                        Color(UIColor.systemBackground),
-                        Color(UIColor.secondarySystemBackground).opacity(0.3)
+                        Color.unifiedBackground,
+                        Color.unifiedSecondaryBackground.opacity(0.3)
                     ],
                     startPoint: .top,
                     endPoint: .bottom
@@ -158,9 +158,9 @@ struct UnifiedStatCardView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(16)
-        .background(Color(UIColor.secondarySystemBackground))
-        .cornerRadius(12)
+        .padding(UnifiedSpacing.md)
+        .background(Color.unifiedSecondaryBackground)
+        .cornerRadius(UnifiedCornerRadius.medium)
         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
@@ -170,7 +170,7 @@ struct UnifiedNavigationStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationBarHidden(true)
-            .background(Color(UIColor.systemBackground))
+            .background(Color.unifiedBackground)
     }
 }
 
@@ -200,7 +200,7 @@ struct UnifiedPrimaryButtonStyle: ButtonStyle {
                     endPoint: .trailing
                 )
             )
-            .cornerRadius(12)
+            .cornerRadius(UnifiedCornerRadius.medium)
             .shadow(
                 color: (isEnabled ? Color.blue : Color.gray).opacity(0.3),
                 radius: 4,
@@ -220,7 +220,7 @@ struct UnifiedSecondaryButtonStyle: ButtonStyle {
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(Color.blue.opacity(0.1))
-            .cornerRadius(8)
+            .cornerRadius(UnifiedCornerRadius.small)
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
@@ -294,5 +294,5 @@ enum UnifiedCornerRadius {
         
         Spacer()
     }
-    .background(Color(UIColor.systemBackground))
+    .background(Color.unifiedBackground)
 }

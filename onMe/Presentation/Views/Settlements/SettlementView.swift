@@ -22,8 +22,8 @@ struct SettlementView: View {
             VStack(spacing: 0) {
                 // 統一ヘッダー
                 UnifiedHeaderView(
-                    title: appState.selectedGroup?.name ?? "清算",
-                    subtitle: appState.selectedGroup != nil ? "グループの清算を管理" : nil,
+                    title: "清算",
+                    subtitle: appState.selectedGroup != nil ? "グループの清算を管理" : "グループを選択して清算を開始",
                     primaryAction: appState.selectedGroup != nil ? { showingExpenseForm = true } : nil,
                     primaryActionTitle: appState.selectedGroup != nil ? "支出登録" : nil,
                     primaryActionIcon: appState.selectedGroup != nil ? "plus.circle.fill" : nil,
@@ -34,13 +34,13 @@ struct SettlementView: View {
                                 title: "未清算件数",
                                 value: "\(viewModel.settlementSuggestions.count)件",
                                 icon: "arrow.left.arrow.right.circle.fill",
-                                color: .orange
+                                color: Color.unifiedAccent
                             ),
                             HeaderStatistics.StatItem(
                                 title: "清算済み",
                                 value: "\(viewModel.completedSettlements.count)件",
                                 icon: "checkmark.circle.fill",
-                                color: .green
+                                color: Color.unifiedSecondary
                             )
                         ]) : nil
                 )
