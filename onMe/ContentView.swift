@@ -52,20 +52,21 @@ struct ContentView: View {
                     }) {
                         Image(systemName: "plus")
                             .font(.title2)
-                            .fontWeight(.semibold)
+                            .fontWeight(.bold)
                             .foregroundColor(.white)
-                            .frame(width: 56, height: 56)
+                            .frame(width: 60, height: 60)
                             .background(
                                 Circle()
                                     .fill(
                                         LinearGradient(
-                                            gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                                            colors: [Color.unifiedPrimary, Color.unifiedPrimary.opacity(0.8)],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
                                     )
                             )
-                            .shadow(color: Color.blue.opacity(0.3), radius: 8, x: 0, y: 4)
+                            .shadow(color: Color.unifiedPrimary.opacity(0.4), radius: 12, x: 0, y: 6)
+                            .scaleEffect(1.0)
                     }
                     .padding(.trailing, 20)
                     .padding(.bottom, 90) // タブバーの上に配置
@@ -75,10 +76,24 @@ struct ContentView: View {
         .accentColor(.blue)
         .preferredColorScheme(appState.isDarkModeEnabled ? .dark : .light)
         .onAppear {
-            // タブバーの外観をカスタマイズ
+            // タブバーの外観を統一されたスタイルでカスタマイズ
             let tabBarAppearance = UITabBarAppearance()
             tabBarAppearance.configureWithOpaqueBackground()
             tabBarAppearance.backgroundColor = UIColor.systemBackground
+            
+            // 選択されたタブのアクセントカラーを統一
+            tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor.systemBlue
+            tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [
+                .foregroundColor: UIColor.systemBlue,
+                .font: UIFont.systemFont(ofSize: 10, weight: .semibold)
+            ]
+            
+            // 非選択タブのスタイル
+            tabBarAppearance.stackedLayoutAppearance.normal.iconColor = UIColor.secondaryLabel
+            tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [
+                .foregroundColor: UIColor.secondaryLabel,
+                .font: UIFont.systemFont(ofSize: 10, weight: .medium)
+            ]
             
             UITabBar.appearance().standardAppearance = tabBarAppearance
             UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance

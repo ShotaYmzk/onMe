@@ -45,7 +45,7 @@ class CurrencyDatabase {
         "MYR": CurrencyInfo(code: "MYR", name: "Malaysian Ringgit", symbol: "RM", region: "Malaysia"),
         "PHP": CurrencyInfo(code: "PHP", name: "Philippine Peso", symbol: "₱", region: "Philippines"),
         "IDR": CurrencyInfo(code: "IDR", name: "Indonesian Rupiah", symbol: "Rp", region: "Indonesia", decimalPlaces: 0),
-        "VND": CurrencyInfo(code: "VND", name: "Vietnamese Dong", symbol: "₫", region: "Vietnam", decimalPlaces: 0),
+        "VND": CurrencyInfo(code: "VND", name: "Vietnamese Dong", symbol: "₫", region: "Vietnam", decimalPlaces: 0, isPopular: true),
         "INR": CurrencyInfo(code: "INR", name: "Indian Rupee", symbol: "₹", region: "India"),
         
         // Oceania
@@ -235,6 +235,7 @@ extension CurrencyInfo {
         case "MXN": return Locale(identifier: "es_MX")
         case "RUB": return Locale(identifier: "ru_RU")
         case "TRY": return Locale(identifier: "tr_TR")
+        case "VND": return Locale(identifier: "vi_VN")
         case "ZAR": return Locale(identifier: "af_ZA")
         default: return Locale.current
         }

@@ -18,6 +18,9 @@ struct GroupDetailView: View {
     @State private var showingExpenseForm = false
     @State private var showingMemberManagement = false
     @State private var showingSettlement = false
+    @State private var showingDeleteConfirmation = false
+    @State private var showingDeleteError = false
+    @State private var deleteErrorMessage = ""
     
     private var members: [GroupMember] {
         group.members?.allObjects
@@ -130,6 +133,12 @@ struct GroupDetailView: View {
                         Button(action: { showingSettlement = true }) {
                             Label("清算計算", systemImage: "equal.circle")
                         }
+                        
+                        Divider()
+                        
+                        Button(role: .destructive, action: { showingDeleteConfirmation = true }) {
+                            Label("グループを削除", systemImage: "trash")
+                        }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                             .font(.title3)
@@ -145,6 +154,45 @@ struct GroupDetailView: View {
             .sheet(isPresented: $showingSettlement) {
                 SettlementView()
             }
+            .alert("グループを削除", isPresented: $showingDeleteConfirmation) {
+                Button("削除", role: .destructive) {
+                    deleteGroup()
+                }
+                Button("キャンセル", role: .cancel) { }
+            } message: {
+                Text("「\(group.name ?? "")」を削除しますか？\n\nこのグループに関連する支出や清算データもすべて削除されます。\n\nこの操作は元に戻せません。")
+            }
+            .alert("エラー", isPresented: $showingDeleteError) {
+                Button("OK") { }
+            } message: {
+                Text(deleteErrorMessage)
+            }
+        }
+    }
+    
+    private func deleteGroup() {
+        // グループを論理削除
+        group.isActive = false
+        
+        // 関連するデータも論理削除
+        if let members = group.members?.allObjects as? [GroupMember] {
+            members.forEach { member in
+                member.isActive = false
+            }
+        }
+        
+        if let expenses = group.expenses?.allObjects as? [Expense] {
+            expenses.forEach { expense in
+                expense.isActive = false
+            }
+        }
+        
+        do {
+            try viewContext.save()
+            dismiss() // 削除後に前の画面に戻る
+        } catch {
+            deleteErrorMessage = "グループの削除に失敗しました: \(error.localizedDescription)"
+            showingDeleteError = true
         }
     }
 }

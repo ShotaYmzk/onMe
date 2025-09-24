@@ -49,6 +49,7 @@
 		5157B6EB2E81ADBE007E633D /* CurrencyDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6EA2E81ADBE007E633D /* CurrencyDatabase.swift */; };
 		5157B6EE2E81B9CD007E633D /* GroupDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6ED2E81B9CD007E633D /* GroupDetailView.swift */; };
 		5157B6F02E81B9DC007E633D /* LocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6EF2E81B9DC007E633D /* LocationPickerView.swift */; };
+		5157B6F22E83D776007E633D /* UnifiedHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5157B6F12E83D776007E633D /* UnifiedHeaderView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -114,6 +115,7 @@
 		5157B6EA2E81ADBE007E633D /* CurrencyDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrencyDatabase.swift; sourceTree = "<group>"; };
 		5157B6ED2E81B9CD007E633D /* GroupDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupDetailView.swift; sourceTree = "<group>"; };
 		5157B6EF2E81B9DC007E633D /* LocationPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
+		5157B6F12E83D776007E633D /* UnifiedHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnifiedHeaderView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -392,6 +394,7 @@
 		5157B6DE2E8175B3007E633D /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				5157B6F12E83D776007E633D /* UnifiedHeaderView.swift */,
 				5157B6EF2E81B9DC007E633D /* LocationPickerView.swift */,
 				5157B6E82E81AD9F007E633D /* CurrencyPickerView.swift */,
 				5157B6DD2E8175B3007E633D /* CurrencyConversionView.swift */,
@@ -581,6 +584,7 @@
 				5157B6AA2E813B45007E633D /* SettlementDetailView.swift in Sources */,
 				5157B6622E8136D2007E633D /* onMeApp.swift in Sources */,
 				5157B6A62E813B45007E633D /* ExpenseListView.swift in Sources */,
+				5157B6F22E83D776007E633D /* UnifiedHeaderView.swift in Sources */,
 				5157B6DF2E8175B3007E633D /* CurrencyConversionView.swift in Sources */,
 				5157B6B12E813B45007E633D /* TravelSettle.xcdatamodeld in Sources */,
 				5157B6A92E813B45007E633D /* SettingsView.swift in Sources */,

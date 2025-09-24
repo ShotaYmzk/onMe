@@ -134,6 +134,8 @@ private func localeForCurrency(_ currency: String) -> Locale {
         return Locale(identifier: "en_SG")
     case "HKD":
         return Locale(identifier: "zh_HK")
+    case "VND":
+        return Locale(identifier: "vi_VN")
     case "AUD":
         return Locale(identifier: "en_AU")
     default:
@@ -232,9 +234,17 @@ struct CurrencyConversionView_Previews: PreviewProvider {
             )
             .environmentObject(AppState())
             
-            SimpleCurrencyView(amount: 1500, currency: "EUR")
+            // VNDのテスト
+            CurrencyConversionView(
+                originalAmount: 100,
+                originalCurrency: "USD",
+                preferredCurrency: "VND"
+            )
+            .environmentObject(AppState())
             
-            ExchangeRateDisplayView(fromCurrency: "USD", toCurrency: "JPY")
+            SimpleCurrencyView(amount: 2415000, currency: "VND")
+            
+            ExchangeRateDisplayView(fromCurrency: "USD", toCurrency: "VND")
                 .environmentObject(AppState())
         }
         .padding()

@@ -25,78 +25,36 @@ struct GroupListView: View {
     @State private var showingQuickCreateSheet = false
     @State private var quickGroupName = ""
     @State private var selectedGroupForSharing: TravelGroup?
+    @State private var groupToDelete: TravelGroup?
+    @State private var showingDeleteConfirmation = false
+    @State private var showingDeleteError = false
+    @State private var deleteErrorMessage = ""
     
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // ヘッダー部分
-                VStack(spacing: 16) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("onMe")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .foregroundColor(.primary)
-                            
-                            Text("旅行の割り勘を簡単に")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        Spacer()
-                        
-                        // クイック作成ボタン
-                        Button(action: { showingQuickCreateSheet = true }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title3)
-                                Text("作成")
-                                    .fontWeight(.semibold)
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                LinearGradient(
-                                    colors: [.blue, .blue.opacity(0.8)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(20)
-                            .shadow(color: .blue.opacity(0.3), radius: 4, x: 0, y: 2)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                    
-                    // 統計情報（グループがある場合）
-                    if !groups.isEmpty {
-                        HStack(spacing: 20) {
-                            StatCardView(
-                                title: "グループ数",
-                                value: "\(groups.count)",
-                                icon: "person.3.fill",
-                                color: .blue
-                            )
-                            
-                            StatCardView(
-                                title: "総支出",
-                                value: formatTotalExpenses(),
-                                icon: "creditcard.fill",
-                                color: .green
-                            )
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                }
-                .padding(.bottom, 16)
-                .background(
-                    LinearGradient(
-                        colors: [Color(UIColor.systemBackground), Color(UIColor.secondarySystemBackground).opacity(0.3)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
+                // 統一ヘッダー
+                UnifiedHeaderView(
+                    title: "onMe",
+                    subtitle: "旅行の割り勘を簡単に",
+                    primaryAction: { showingQuickCreateSheet = true },
+                    primaryActionTitle: "作成",
+                    primaryActionIcon: "plus.circle.fill",
+                    showStatistics: !groups.isEmpty,
+                    statisticsData: !groups.isEmpty ? HeaderStatistics(items: [
+                        HeaderStatistics.StatItem(
+                            title: "グループ数",
+                            value: "\(groups.count)",
+                            icon: "person.3.fill",
+                            color: .blue
+                        ),
+                        HeaderStatistics.StatItem(
+                            title: "総支出",
+                            value: formatTotalExpenses(),
+                            icon: "creditcard.fill",
+                            color: .green
+                        )
+                    ]) : nil
                 )
                 
                 // メインコンテンツ
@@ -113,9 +71,42 @@ struct GroupListView: View {
                                         selectedGroupForManagement = group
                                     }, onShare: {
                                         selectedGroupForSharing = group
+                                    }, onDelete: {
+                                        groupToDelete = group
+                                        showingDeleteConfirmation = true
                                     })
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                                .contextMenu {
+                                    Button(action: {
+                                        selectedGroupForManagement = group
+                                    }) {
+                                        Label("メンバー管理", systemImage: "person.badge.plus")
+                                    }
+                                    
+                                    Button(action: {
+                                        selectedGroupForSharing = group
+                                    }) {
+                                        Label("共有", systemImage: "square.and.arrow.up")
+                                    }
+                                    
+                                    Divider()
+                                    
+                                    Button(role: .destructive, action: {
+                                        groupToDelete = group
+                                        showingDeleteConfirmation = true
+                                    }) {
+                                        Label("グループを削除", systemImage: "trash")
+                                    }
+                                }
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    Button(role: .destructive) {
+                                        groupToDelete = group
+                                        showingDeleteConfirmation = true
+                                    } label: {
+                                        Label("削除", systemImage: "trash")
+                                    }
+                                }
                             }
                         }
                         .padding(.horizontal, 20)
@@ -126,7 +117,7 @@ struct GroupListView: View {
                     }
                 }
             }
-            .navigationBarHidden(true)
+            .unifiedNavigationStyle()
             .sheet(isPresented: $showingCreateGroup) {
                 CreateGroupView()
             }
@@ -139,9 +130,41 @@ struct GroupListView: View {
             .sheet(item: $selectedGroupForSharing) { group in
                 GroupSharingView(group: group)
             }
+            .alert("グループを削除", isPresented: $showingDeleteConfirmation) {
+                Button("削除", role: .destructive) {
+                    if let group = groupToDelete {
+                        deleteGroup(group)
+                    }
+                }
+                Button("キャンセル", role: .cancel) {
+                    groupToDelete = nil
+                }
+            } message: {
+                if let group = groupToDelete {
+                    Text("「\(group.name ?? "")」を削除しますか？\n\nこのグループに関連する支出や清算データもすべて削除されます。\n\nこの操作は元に戻せません。")
+                }
+            }
+            .alert("エラー", isPresented: $showingDeleteError) {
+                Button("OK") { }
+            } message: {
+                Text(deleteErrorMessage)
+            }
         }
         .onAppear {
             viewModel.setContext(viewContext)
+        }
+    }
+    
+    private func deleteGroup(_ group: TravelGroup) {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            do {
+                try viewModel.deleteGroup(group)
+                groupToDelete = nil
+            } catch {
+                deleteErrorMessage = "グループの削除に失敗しました: \(error.localizedDescription)"
+                showingDeleteError = true
+                groupToDelete = nil
+            }
         }
     }
     
@@ -351,6 +374,7 @@ struct ModernGroupCardView: View {
     let group: TravelGroup
     let onManageMembers: () -> Void
     let onShare: () -> Void
+    let onDelete: () -> Void
     @Environment(\.colorScheme) var colorScheme
     
     private var totalExpenses: Decimal {
@@ -467,6 +491,22 @@ struct ModernGroupCardView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color.green.opacity(0.1))
+                    .cornerRadius(8)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Button(action: onDelete) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "trash")
+                            .font(.caption)
+                        Text("削除")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.red)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.red.opacity(0.1))
                     .cornerRadius(8)
                 }
                 .buttonStyle(PlainButtonStyle())

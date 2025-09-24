@@ -19,9 +19,35 @@ struct SettlementView: View {
     
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing: 0) {
+                // 統一ヘッダー
+                UnifiedHeaderView(
+                    title: appState.selectedGroup?.name ?? "清算",
+                    subtitle: appState.selectedGroup != nil ? "グループの清算を管理" : nil,
+                    primaryAction: appState.selectedGroup != nil ? { showingExpenseForm = true } : nil,
+                    primaryActionTitle: appState.selectedGroup != nil ? "支出登録" : nil,
+                    primaryActionIcon: appState.selectedGroup != nil ? "plus.circle.fill" : nil,
+                    showStatistics: appState.selectedGroup != nil && !viewModel.settlementSuggestions.isEmpty,
+                    statisticsData: appState.selectedGroup != nil && !viewModel.settlementSuggestions.isEmpty ? 
+                        HeaderStatistics(items: [
+                            HeaderStatistics.StatItem(
+                                title: "未清算件数",
+                                value: "\(viewModel.settlementSuggestions.count)件",
+                                icon: "arrow.left.arrow.right.circle.fill",
+                                color: .orange
+                            ),
+                            HeaderStatistics.StatItem(
+                                title: "清算済み",
+                                value: "\(viewModel.completedSettlements.count)件",
+                                icon: "checkmark.circle.fill",
+                                color: .green
+                            )
+                        ]) : nil
+                )
+                
+                // メインコンテンツ
                 if appState.selectedGroup == nil {
-                    NoGroupSelectedView {
+                    SettlementNoGroupSelectedView {
                         showingExpenseForm = true
                     }
                 } else {
@@ -35,7 +61,7 @@ struct SettlementView: View {
                     }
                 }
             }
-            .navigationTitle(appState.selectedGroup?.name ?? "清算")
+            .unifiedNavigationStyle()
             .onAppear {
                 if let group = appState.selectedGroup {
                     viewModel.loadSettlements(for: group)
@@ -327,6 +353,61 @@ struct SettlementHistoryRow: View {
         formatter.minimumFractionDigits = 0
         formatter.maximumFractionDigits = 0
         return formatter
+    }
+}
+
+struct SettlementNoGroupSelectedView: View {
+    let onCreateExpense: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            VStack(spacing: 16) {
+                Image(systemName: "arrow.left.arrow.right.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.secondary)
+                
+                VStack(spacing: 8) {
+                    Text("グループを選択してください")
+                        .font(.title2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    Text("グループタブからグループを選択すると\nそのグループの清算状況を表示できます")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+            }
+            
+            VStack(spacing: 12) {
+                Text("または")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Button(action: onCreateExpense) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title3)
+                        Text("新しい支出を登録")
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.orange, Color.orange.opacity(0.8)]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+                    .shadow(color: Color.orange.opacity(0.3), radius: 4, x: 0, y: 2)
+                }
+            }
+        }
+        .padding(.horizontal, 32)
+        .padding(.vertical, 40)
     }
 }
 

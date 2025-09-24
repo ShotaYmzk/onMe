@@ -31,7 +31,33 @@ struct ExpenseListView: View {
     
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing: 0) {
+                // 統一ヘッダー
+                UnifiedHeaderView(
+                    title: appState.selectedGroup?.name ?? "支出",
+                    subtitle: appState.selectedGroup != nil ? "グループの支出を管理" : nil,
+                    primaryAction: { showingExpenseForm = true },
+                    primaryActionTitle: "登録",
+                    primaryActionIcon: "plus.circle.fill",
+                    showStatistics: appState.selectedGroup != nil && !filteredExpenses.isEmpty,
+                    statisticsData: appState.selectedGroup != nil && !filteredExpenses.isEmpty ? 
+                        HeaderStatistics(items: [
+                            HeaderStatistics.StatItem(
+                                title: "支出件数",
+                                value: "\(filteredExpenses.count)件",
+                                icon: "creditcard.fill",
+                                color: .green
+                            ),
+                            HeaderStatistics.StatItem(
+                                title: "合計金額",
+                                value: formatTotalExpenses(),
+                                icon: "yensign.circle.fill",
+                                color: .blue
+                            )
+                        ]) : nil
+                )
+                
+                // メインコンテンツ
                 if appState.selectedGroup == nil {
                     NoGroupSelectedView {
                         showingExpenseForm = true
@@ -59,23 +85,7 @@ struct ExpenseListView: View {
                     }
                 }
             }
-            .navigationTitle(appState.selectedGroup?.name ?? "支出")
-            .toolbar(content: {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingExpenseForm = true }) {
-                        Image(systemName: "plus")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                    }
-                }
-                
-                if appState.selectedGroup != nil && !filteredExpenses.isEmpty {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        EditButton()
-                            .fontWeight(.medium)
-                    }
-                }
-            })
+            .unifiedNavigationStyle()
             .sheet(isPresented: $showingExpenseForm) {
                 ExpenseFormView(preselectedGroup: appState.selectedGroup)
             }
@@ -97,6 +107,20 @@ struct ExpenseListView: View {
                 print("支出の削除に失敗しました: \(error)")
             }
         }
+    }
+    
+    private func formatTotalExpenses() -> String {
+        let total = filteredExpenses.reduce(0.0) { sum, expense in
+            let expenseTotal = expense.payments?.allObjects
+                .compactMap { $0 as? ExpensePayment }
+                .reduce(0.0) { $0 + ($1.amount?.doubleValue ?? 0) } ?? 0
+            return sum + expenseTotal
+        }
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
+        return "¥\(formatter.string(from: NSNumber(value: total)) ?? "0")"
     }
 }
 

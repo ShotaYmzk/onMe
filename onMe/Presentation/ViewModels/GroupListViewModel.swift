@@ -65,7 +65,22 @@ class GroupListViewModel: ObservableObject {
             throw GroupError.contextNotAvailable
         }
         
+        // グループを論理削除（isActive = false）
         group.isActive = false
+        
+        // 関連するデータも論理削除
+        if let members = group.members?.allObjects as? [GroupMember] {
+            members.forEach { member in
+                member.isActive = false
+            }
+        }
+        
+        if let expenses = group.expenses?.allObjects as? [Expense] {
+            expenses.forEach { expense in
+                expense.isActive = false
+            }
+        }
+        
         try context.save()
         loadGroups()
     }
